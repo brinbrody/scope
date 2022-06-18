@@ -17,23 +17,14 @@ using DGScope.Receivers;
 using System.Threading;
 using libmetar;
 using System.Windows.Forms.Design;
+using DGScope.Library;
 using System.Threading.Tasks;
 
 namespace DGScope
 {
     public class RadarWindow
     {
-        public enum LeaderDirection
-        {
-            NW = 135, 
-            N  = 90,
-            NE = 45,
-            W  = 180,
-            E  = 0,
-            SW = 225,
-            S  = 270, 
-            SE = 315
-        }
+        
 
         public static LeaderDirection ParseLDR(string direction)
         {

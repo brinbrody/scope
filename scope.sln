@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29409.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DGScope", "scope\DGScope.csproj", "{DE29D155-652E-44C2-8008-C6C3E5A45A16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexradDecoder", "NexradDecoder\NexradDecoder.csproj", "{6A8559F0-0F1F-49C6-BAAE-6D1C0A624940}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.ADSBX", "DGScope.Receivers.ADSBX\DGScope.Receivers.ADSBX.csproj", "{34098207-2394-481B-BF0E-91595F175EAD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.SBS", "DGScope.Receivers.SBS\DGScope.Receivers.SBS.csproj", "{601B971D-2AE6-4CEA-A7E2-F09A53149DA4}"
@@ -14,6 +12,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.Beast", "DGScope.Receivers.Beast\DGScope.Receivers.Beast.csproj", "{136B8F7D-EB0B-4260-83E9-95CE105D20F5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.FAA_SCDS", "DGScope.Receivers.FAA_SCDS\DGScope.Receivers.FAA_SCDS.csproj", "{4BF19932-3BD0-41D0-883A-7A1DFBC2DEB5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Library", "DGScope.Library\DGScope.Library.csproj", "{E6F34299-1536-4ED4-A8CD-397B1CA354E1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScopeWindow", "ScopeWindow\ScopeWindow.csproj", "{1C708608-48D8-4F2A-9D9D-8012CB10C96F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DGScope.Nexrad", "Nexrad\DGScope.Nexrad.csproj", "{016AC459-4994-4337-990F-E18B66066E18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +29,6 @@ Global
 		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6A8559F0-0F1F-49C6-BAAE-6D1C0A624940}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6A8559F0-0F1F-49C6-BAAE-6D1C0A624940}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A8559F0-0F1F-49C6-BAAE-6D1C0A624940}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6A8559F0-0F1F-49C6-BAAE-6D1C0A624940}.Release|Any CPU.Build.0 = Release|Any CPU
 		{34098207-2394-481B-BF0E-91595F175EAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{34098207-2394-481B-BF0E-91595F175EAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34098207-2394-481B-BF0E-91595F175EAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +45,18 @@ Global
 		{4BF19932-3BD0-41D0-883A-7A1DFBC2DEB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BF19932-3BD0-41D0-883A-7A1DFBC2DEB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BF19932-3BD0-41D0-883A-7A1DFBC2DEB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C708608-48D8-4F2A-9D9D-8012CB10C96F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C708608-48D8-4F2A-9D9D-8012CB10C96F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C708608-48D8-4F2A-9D9D-8012CB10C96F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C708608-48D8-4F2A-9D9D-8012CB10C96F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{016AC459-4994-4337-990F-E18B66066E18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{016AC459-4994-4337-990F-E18B66066E18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{016AC459-4994-4337-990F-E18B66066E18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{016AC459-4994-4337-990F-E18B66066E18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

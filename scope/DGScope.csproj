@@ -190,8 +190,6 @@
   <ItemGroup>
     <Compile Include="Aircraft.cs" />
     <Compile Include="AirportsXml.cs" />
-    <Compile Include="Altitude.cs" />
-    <Compile Include="GeoPoint.cs" />
     <Compile Include="InputBox.cs" />
     <Compile Include="TPARing.cs" />
     <Compile Include="LeaderLine.cs" />
@@ -214,7 +212,6 @@
     <Compile Include="RangeBearingLine.cs" />
     <Compile Include="ReadWriteBuffer.cs" />
     <Compile Include="ReceiverCollectionEditor.cs" />
-    <Compile Include="Receivers.cs" />
     <Compile Include="RuntimeServiceProvider.cs" />
     <Compile Include="TransparentLabel.cs">
       <SubType>Component</SubType>
@@ -262,9 +259,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NexradDecoder\NexradDecoder.csproj">
-      <Project>{6a8559f0-0f1f-49c6-baae-6d1c0a624940}</Project>
-      <Name>NexradDecoder</Name>
+    <ProjectReference Include="..\DGScope.Library\DGScope.Library.csproj">
+      <Project>{e6f34299-1536-4ed4-a8cd-397b1ca354e1}</Project>
+      <Name>DGScope.Library</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

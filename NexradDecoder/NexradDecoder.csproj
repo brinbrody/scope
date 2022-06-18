@@ -49,15 +49,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayMerge.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="NexradDecoder.cs" />
     <Compile Include="Class2.cs" />
     <Compile Include="Description.cs" />
     <Compile Include="GraphicBlock.cs" />
     <Compile Include="Header.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RadialPacketDecoder.cs" />
-    <Compile Include="RasterPacketDecoder.cs" />
     <Compile Include="SymbologyBlock.cs" />
     <Compile Include="WXColorTable.cs" />
   </ItemGroup>

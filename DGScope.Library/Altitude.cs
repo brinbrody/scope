@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using libmetar;
+﻿using libmetar;
+using System;
 
 namespace DGScope
 {
     public class Altitude
     {
         public int Value { get; set; }
-        public AltitudeType AltitudeType { get; set;}
+        public AltitudeType AltitudeType { get; set; }
         public int TransitionAltitude { get; set; }
-        public int PressureAltitude 
-        { 
+        public int PressureAltitude
+        {
             get
             {
                 if (AltitudeType == AltitudeType.Pressure)
@@ -51,15 +47,15 @@ namespace DGScope
 
         private object convertLockObject = new object();
 
-        public Altitude (){}
+        public Altitude() { }
 
-        public void SetAltitudeProperties (int TransitionAltitude, Pressure Altimeter)
+        public void SetAltitudeProperties(int TransitionAltitude, Pressure Altimeter)
         {
             this.TransitionAltitude = TransitionAltitude;
             this.Altimeter = Altimeter;
         }
 
-        public void UpdateAltitude (int Value, AltitudeType type)
+        public void UpdateAltitude(int Value, AltitudeType type)
         {
             lock (convertLockObject)
             {
@@ -69,7 +65,7 @@ namespace DGScope
         }
 
         private Pressure Altimeter;
-        public Altitude ConvertTo (AltitudeType type)
+        public Altitude ConvertTo(AltitudeType type)
         {
             lock (convertLockObject)
             {

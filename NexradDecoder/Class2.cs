@@ -10,15 +10,13 @@ namespace NexradDecoder
     {
         static void Main(string[] args)
         {
-            var reflectivitydecoder = new RadialPacketDecoder();
-            reflectivitydecoder.setFileResource("E:\\Users\\Dennis\\Downloads\\KOKX_SDUS51_N0ROKX_202009292354");
-            var header= reflectivitydecoder.parseMHB();
-            var description = reflectivitydecoder.parsePDB();
-            var symbology = reflectivitydecoder.parsePSB();
+            var reflectivitydecoder = new NexradDecoder();
+            reflectivitydecoder.Parse("E:\\Users\\Dennis\\Downloads\\KOKX_SDUS51_N0ROKX_202009292354");
+            
             GraphicBlock graphic;
-            if (description.GraphicOffset != 0)
+            if (reflectivitydecoder.DescriptionBlock.GraphicOffset != 0)
             {
-                graphic = reflectivitydecoder.parseGAB();
+                graphic = reflectivitydecoder.ParseGAB();
             }
         }
     } 

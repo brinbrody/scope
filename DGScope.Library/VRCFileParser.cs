@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DGScope.Library
 {
-    public class VRCFileParser
+    public static class VRCFileParser
     {
         public static List<VideoMap> GetMapsFromFile(string filename)
         {
@@ -111,7 +111,7 @@ namespace DGScope.Library
                 if (lat.Length >= 3 && double.TryParse(lat[2], out value))
                     latitude += value / 3600;
                 if (lat.Length >= 4 && double.TryParse(lat[3], out value))
-                    latitude += value / 3600000;
+                    latitude += value / (3600 * Math.Pow(10, lat[3].Trim().Length));
             }
             if (pointSplit[0].Contains('S'))
                 latitude *= -1;
@@ -132,7 +132,7 @@ namespace DGScope.Library
                 if (lon.Length >= 3 && double.TryParse(lon[2], out value))
                     longitude += value / 3600;
                 if (lon.Length >= 4 && double.TryParse(lon[3], out value))
-                    longitude += value / 3600000;
+                    longitude += value / (3600 * Math.Pow(10, lon[3].Trim().Length));
             }
             if (pointSplit[1].Contains('W'))
                 longitude *= -1;

@@ -13,6 +13,16 @@ namespace DGScope.Library
         [XmlIgnore]
         public string Filename { get; set; }
         public VideoMapList() : base() { }
+        public VideoMapList(object[] maps) : base() 
+        {
+            foreach (var item in maps)
+            {
+                if (item.GetType() != typeof(VideoMap))
+                    throw new InvalidDataException("Passed object was type " + item.GetType().ToString() + " and not a Video Map.");
+                Add(item as VideoMap);
+            }
+        }
+
         public VideoMapList(string filename) : base()
         {
             Filename = filename;
@@ -39,17 +49,16 @@ namespace DGScope.Library
         }
         public static string SerializeToJson(VideoMapList videoMaps)
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            return JsonSerializer.Serialize(videoMaps, options);
+            return GeoJSONMapExporter.MapsToGeoJSON(videoMaps);
         }
         public static VideoMapList DeserializeFromJsonFile(string filename)
         {
             string json = File.ReadAllText(filename);
-            return DeserializeFromJson(json);
+            return GeoJSONMapExporter.GeoJSONToMaps(json);
         }
         public static VideoMapList DeserializeFromJson(string jsonString)
         {
-            return (VideoMapList)JsonSerializer.Deserialize(jsonString,typeof(VideoMapList));
+            return GeoJSONMapExporter.GeoJSONToMaps(jsonString);
         }
     }
 }

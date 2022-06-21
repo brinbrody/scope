@@ -66,7 +66,7 @@ namespace ScopeWindow
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "VRC Sector Files (*.sct2)|*.sct2";
+                openFileDialog.Filter = "VRC Sector Files (*.sct2)|*.sct2|All Files|*.*";
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
 
@@ -90,7 +90,9 @@ namespace ScopeWindow
         private void ResetGrid()
         {
             if (adaptation != null)
-                adaptation.VideoMaps = maps; source.DataSource = new BindingList<VideoMap>(maps);
+                adaptation.VideoMaps = maps;
+            maps.OrderBy(x => x.Number);
+            source.DataSource = new BindingList<VideoMap>(maps);
             dataGridView1.DataSource = source;
             source.ResetBindings(false);
             dataGridView1.AutoResizeColumns();
@@ -103,7 +105,16 @@ namespace ScopeWindow
 
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
-            if (dataGridView1.SelectedRows.Count > 1)
+            if (dataGridView1.SelectedRows.Count > dataGridView1.Rows.Count - 1)
+            {
+                var selectedmaps = dataGridView1.Rows
+                                        .Cast<DataGridViewRow>()
+                                        .Select(d => (VideoMap)d.DataBoundItem)
+                                        .Where(d => d != null).
+                                        ToArray();
+                propertyGrid1.SelectedObjects = selectedmaps;
+            }
+            else if (dataGridView1.SelectedRows.Count > 1)
             {
                 var selectedmaps = dataGridView1.Rows
                                         .Cast<DataGridViewRow>()
@@ -124,7 +135,7 @@ namespace ScopeWindow
             {
                 using (SaveFileDialog s = new SaveFileDialog())
                 {
-                    s.Filter = "Video Maps (*.vidmapjson)|*.vidmapjson";
+                    s.Filter = "Video Maps (*.geojson;*.json)|*.geojson;*.json|All Files|*.*";
                     s.FilterIndex = 1;
                     s.RestoreDirectory = true;
 
@@ -168,7 +179,7 @@ namespace ScopeWindow
             string filename;
             using (OpenFileDialog s = new OpenFileDialog())
             {
-                s.Filter = "JSON video maps (*.vidmapjson)|*.vidmapjson";
+                s.Filter = "JSON video maps (*.geojson;*.json)|*.geojson;*.json|All Files|*.*";
                 s.FilterIndex = 1;
                 s.RestoreDirectory = true;
 
@@ -223,7 +234,7 @@ namespace ScopeWindow
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "FAA .dat Files (*.dat)|*.dat";
+                openFileDialog.Filter = "FAA .dat Files (*.dat)|*.dat|All Files|*.*";
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
 
@@ -233,14 +244,50 @@ namespace ScopeWindow
                     var filePath = openFileDialog.FileName;
 
                     //Read the contents of the file into a stream
-                    switch (openFileDialog.FilterIndex)
-                    {
-                        case 1:
-                            var map = FAAMapDATFileParser.GetMapFromFile(filePath);
-                            map.Number = maps.Last().Number + 1;
-                            maps.Add(map);
-                            break;
-                    }
+                    var map = FAAMapDATFileParser.GetMapFromFile(filePath);
+                    map.Number = maps.Last().Number + 1;
+                    maps.Add(map);
+                }
+            }
+            changed = true;
+            ResetGrid();
+        }
+
+        private void toGeoJSONToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "GeoJSON Files (*.geojson; *.json)|*.geojson; *.json|All Files|*.*";
+                saveFileDialog.FilterIndex = 1;
+                saveFileDialog.RestoreDirectory = true;
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var filePath = saveFileDialog.FileName;
+                    if (dataGridView1.SelectedRows.Count != 1)
+                        GeoJSONMapExporter.MapsToGeoJSONFile(new VideoMapList(propertyGrid1.SelectedObjects), filePath);
+                    else if (propertyGrid1.SelectedObject.GetType() == typeof(VideoMap))
+                        GeoJSONMapExporter.MapToGeoJSONFile(propertyGrid1.SelectedObject as VideoMap, filePath);
+                }
+            }
+        }
+
+        private void fromGeoJSONToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "GeoJSON Files (*.geojson; *.json)|*.geojson;*.json|All Files|*.*";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    //Get the path of specified file
+                    var filePath = openFileDialog.FileName;
+
+                    //Read the contents of the file into a stream
+                    var newmaps = GeoJSONMapExporter.GeoJSONFileToMaps(filePath);
+                    maps.AddRange(newmaps);
                 }
             }
             changed = true;

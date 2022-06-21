@@ -301,10 +301,10 @@ namespace ScopeWindow
                     vertices.Add(0.0f);
                 }
                 var vertexarray = vertices.ToArray();
-                map.VertexBuffer = GL.GenBuffer();
-                var vertexArrayObject = GL.GenVertexArray();
-                GL.BindVertexArray(vertexArrayObject);
-                GL.BindBuffer(BufferTarget.ArrayBuffer, map.VertexBuffer);
+                var buffer = GL.GenBuffer();
+                map.VertexBuffer = GL.GenVertexArray();
+                GL.BindVertexArray(map.VertexBuffer);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, buffer);
                 GL.BufferData(BufferTarget.ArrayBuffer, vertexarray.Length * sizeof(double), vertexarray, BufferUsageHint.StaticDraw);
                 GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Double, false, 3 * sizeof(double), 0);
                 GL.EnableVertexAttribArray(0);

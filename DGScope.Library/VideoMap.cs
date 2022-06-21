@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -11,6 +12,7 @@ namespace DGScope.Library
     {
         public int Number { get; set; }
         [JsonIgnore]
+        [Browsable(false)]
         public int VertexBuffer { get; set; }
         public string Name { get; set; }
         public MapCategory Category { get; set; } = MapCategory.A;

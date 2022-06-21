@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GeoJSON" Version="2.3.1" />
     <PackageReference Include="libmetar" Version="1.0.0" />
   </ItemGroup>
 

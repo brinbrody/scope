@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace DGScope.Library
 {
-    public class FAAMapDATFileParser
+    public static class FAAMapDATFileParser
     {
         public static VideoMap GetMapFromFile(string filename)
         {
             VideoMap map = new VideoMap();
+            map.Name = "Imported map - " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString();
             try
             {
                 // Open the text file using a stream reader.

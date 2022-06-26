@@ -106,8 +106,6 @@ namespace DGScope.Library
                 Callsign = null;
             if (VerticalRate == Track.VerticalRate)
                 VerticalRate = null;
-            if (ModeSCode == Track.ModeSCode)
-                ModeSCode = null;
         }
     }
 }

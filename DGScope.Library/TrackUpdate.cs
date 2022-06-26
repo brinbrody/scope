@@ -55,6 +55,7 @@ namespace DGScope.Library
             Track = track;
             TimeStamp = trackUpdate.TimeStamp;
             Altitude = trackUpdate.Altitude;
+            GroundTrack = trackUpdate.GroundTrack;
             GroundSpeed = trackUpdate.GroundSpeed;
             Ident = trackUpdate.Ident;
             IsOnGround = trackUpdate.IsOnGround;

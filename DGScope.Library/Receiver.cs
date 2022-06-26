@@ -36,7 +36,7 @@ namespace DGScope.Receivers
                 return null;
             facility = GetFacility(facilityID);
             tracks = facility.Tracks.ToList();
-            lock (tracks)
+            lock (facility.Tracks)
             {
                 track = (from x in tracks where x.ModeSCode == icaoID select x).FirstOrDefault();
                 if (track == null)
@@ -54,13 +54,14 @@ namespace DGScope.Receivers
         public Track GetTrack(Guid guid, string facilityID = null)
         {
             List<Track> tracks = new List<Track>();
-            Facilities.ToList().ForEach(facility => tracks.AddRange(facility.Tracks.Where(x => x.Guid == guid)));
+            Facilities.ToList().ForEach(facility => { lock (facility.Tracks) tracks.AddRange(facility.Tracks.Where(x => x.Guid == guid)); });
             Track track = tracks.FirstOrDefault();
             if (track == null && facilityID != null)
             {
                 var facility = GetFacility(facilityID);
                 track = new Track(guid, GetFacility(facilityID));
-                facility.Tracks.Add(track);
+                lock (facility.Tracks)
+                    facility.Tracks.Add(track);
             }
             return track;
         }
@@ -89,20 +90,23 @@ namespace DGScope.Receivers
         {
             FlightPlan flightPlan;
             List<FlightPlan> flightPlans = new List<FlightPlan>();
-            Facilities.ToList().ForEach(x => flightPlans.AddRange(x.FlightPlans));
+            Facilities.ToList().ForEach(x => { lock (flightPlans) flightPlans.AddRange(x.FlightPlans); });
             flightPlan = flightPlans.Where(x => x.Guid == guid).FirstOrDefault();
             return flightPlan;
         }
         public Facility GetFacility(string facilityID)
         {
             Facility facility;
-            if (facilityID == null)
-                return null;
-            facility = Facilities.Where(x => x.FacilityID == facilityID).FirstOrDefault();
-            if (facility == null)
+            lock (Facilities)
             {
-                facility = new Facility() { FacilityID = facilityID };
-                Facilities.Add(facility);
+                if (facilityID == null)
+                    return null;
+                facility = Facilities.Where(x => x.FacilityID == facilityID).FirstOrDefault();
+                if (facility == null)
+                {
+                    facility = new Facility() { FacilityID = facilityID };
+                    Facilities.Add(facility);
+                }
             }
             return facility;
         }

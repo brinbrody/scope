@@ -53,6 +53,126 @@ namespace DGScope.Receivers.FAA_STDDS
             stream.Position = 0;
             return stream;
         }
+
+        private async Task<bool> ParseMessage(Message message)
+        {
+            try
+            {
+                TATrackAndFlightPlan data;
+                using (var stream = GenerateStreamFromString(message.Body.ToString()))
+                {
+                    data = xmlSerializer.Deserialize(stream) as TATrackAndFlightPlan;
+                }
+                if (data.record == null)
+                    return false;
+                foreach (var record in data.record)
+                {
+                    if (stop)
+                        return false;
+                    List<Track> track = null;
+                    FlightPlan flightPlan = null;
+                    if (record.flightPlan != null)
+                        flightPlan = GetFlightPlan(record.flightPlan.acid, data.src);
+                    if (record.track != null)
+                    {
+                        int address = 0;
+                        var addressString = record.track.acAddress;
+                        if (addressString != "")
+                            address = Convert.ToInt32(record.track.acAddress, 16);
+                        if (address != 0)
+                            track = GetTracks(address, data.src);
+                        else
+                        {
+                            if (trackLookup.TryGetValue($"{data.src}{record.track.trackNum}", out Guid guid))
+                                track = GetTracks(guid, data.src);
+                            else
+                            {
+                                var newtrack = new Track(GetFacility(data.src));
+                                trackLookup.Add($"{data.src}{record.track.trackNum}", newtrack.Guid);
+                                track = new List<Track>();
+                                track.Add(newtrack);
+                            }
+                        }
+                    }
+                    if (track != null && record.track != null)
+                    {
+                        TrackUpdate update = new TrackUpdate();
+                        update.TimeStamp = record.track.mrtTime;
+                        if (record.track.reportedBeaconCode > 0)
+                            update.Squawk = record.track.reportedBeaconCode.ToString("0000");
+                        update.Location = new GeoPoint((double)record.track.lat, (double)record.track.lon);
+                        update.GroundTrack = GroundTrack(record.track.vx, record.track.vy);
+                        update.GroundSpeed = GroundSpeed(record.track.vx, record.track.vy);
+                        update.Altitude.TrueAltitude = record.track.reportedAltitude;
+                        var addressString = record.track.acAddress;
+                        int address = 0;
+                        if (addressString != "")
+                            address = Convert.ToInt32(record.track.acAddress, 16);
+                        if (address != 0)
+                            update.ModeSCode = address;
+                        SendTrackUpdates(track, update);
+                    }
+                    if (flightPlan != null && record.flightPlan != null)
+                    {
+
+                        FlightPlanUpdate update = new FlightPlanUpdate(flightPlan);
+                        update.TimeStamp = DateTime.UtcNow;
+                        var scddsfp = record.flightPlan;
+                        if (scddsfp.assignedBeaconCode == 0)
+                            update.AssignedSquawk = scddsfp.assignedBeaconCode.ToString();
+                        update.AircraftType = scddsfp.acType;
+                        update.LDRDirection = ParseLDR(scddsfp.lld);
+                        if (scddsfp.scratchPad1 != null)
+                            update.Scratchpad1 = scddsfp.scratchPad1;
+                        else
+                            update.Scratchpad1 = string.Empty;
+                        if (scddsfp.scratchPad2 != null)
+                            update.Scratchpad2 = scddsfp.scratchPad2;
+                        else
+                            update.Scratchpad2 = string.Empty;
+                        update.RequestedAltitude = scddsfp.requestedAltitude;
+                        update.WakeCategory = scddsfp.category;
+                        update.Destination = scddsfp.exitFix;
+                        update.Origin = scddsfp.entryFix;
+                        update.ExitFix = scddsfp.exitFix;
+                        update.EntryFix = scddsfp.entryFix;
+                        update.FlightRules = scddsfp.flightRules;
+                        update.Callsign = scddsfp.acid.Trim();
+                        update.EquipmentSuffix = scddsfp.eqptSuffix;
+                        switch (scddsfp.ocr)
+                        {
+                            case "intrafacility handoff":
+                            case "normal handoff":
+                            case "manual":
+                            case "no change":
+                            case "consolidation":
+                            case "directed handoff":
+                                update.Owner = scddsfp.cps;
+                                update.PendingHandoff = string.Empty;
+                                break;
+                            case "pending":
+                                update.PendingHandoff = scddsfp.cps;
+                                break;
+                        }
+                        if (track != null)
+                            update.AssociatedTrack = track.FirstOrDefault();
+                        flightPlan.UpdateFlightPlan(update);
+                    }
+                    else
+                        continue;
+
+                }
+
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(message);
+                return false;
+            }
+            return true;
+        }
         private async Task<bool> ReceiveMessage()
         {
             bool stop = false;
@@ -67,121 +187,7 @@ namespace DGScope.Receivers.FAA_STDDS
                 if (message == null)
                     continue;
                 receiver.Accept(message);
-                try
-                {
-                    TATrackAndFlightPlan data;
-                    using (var stream = GenerateStreamFromString(message.Body.ToString()))
-                    {
-                        data = xmlSerializer.Deserialize(stream) as TATrackAndFlightPlan;
-                    }
-                    if (data.record == null)
-                        continue;
-                    foreach (var record in data.record)
-                    {
-                        if (stop)
-                            return false;
-                        List<Track> track = null;
-                        FlightPlan flightPlan = null;
-                        if (record.flightPlan != null)
-                            flightPlan = GetFlightPlan(record.flightPlan.acid, data.src);
-                        if (record.track != null)
-                        {
-                            int address = 0;
-                            var addressString = record.track.acAddress;
-                            if (addressString != "")
-                                address = Convert.ToInt32(record.track.acAddress, 16);
-                            if (address != 0)
-                                track = GetTracks(address, data.src);
-                            else
-                            {
-                                if (trackLookup.TryGetValue($"{data.src}{record.track.trackNum}", out Guid guid))
-                                    track = GetTracks(guid, data.src);
-                                else
-                                {
-                                    var newtrack = new Track(GetFacility(data.src));
-                                    trackLookup.Add($"{data.src}{record.track.trackNum}", newtrack.Guid);
-                                    track = new List<Track>();
-                                    track.Add(newtrack);
-                                }
-                            }
-                        }
-                        if (track != null && record.track != null)
-                        {
-                            TrackUpdate update = new TrackUpdate();
-                            update.TimeStamp = record.track.mrtTime;
-                            if (record.track.reportedBeaconCode > 0)
-                                update.Squawk = record.track.reportedBeaconCode.ToString("0000");
-                            update.Location = new GeoPoint((double)record.track.lat, (double)record.track.lon);
-                            update.GroundTrack = GroundTrack(record.track.vx, record.track.vy);
-                            update.GroundSpeed = GroundSpeed(record.track.vx, record.track.vy);
-                            update.Altitude.TrueAltitude = record.track.reportedAltitude;
-                            var addressString = record.track.acAddress;
-                            int address = 0;
-                            if (addressString != "")
-                                address = Convert.ToInt32(record.track.acAddress, 16);
-                            if (address != 0)
-                                update.ModeSCode = address;
-                            SendTrackUpdates(track, update);
-                        }
-                        if (flightPlan != null && record.flightPlan != null)
-                        {
-                            
-                            FlightPlanUpdate update = new FlightPlanUpdate(flightPlan);
-                            update.TimeStamp = DateTime.UtcNow;
-                            var scddsfp = record.flightPlan;
-                            if (scddsfp.assignedBeaconCode == 0)
-                                update.AssignedSquawk = scddsfp.assignedBeaconCode.ToString();
-                            update.AircraftType = scddsfp.acType;
-                            update.LDRDirection = ParseLDR(scddsfp.lld);
-                            if (scddsfp.scratchPad1 != null)
-                                update.Scratchpad1 = scddsfp.scratchPad1;
-                            else
-                                update.Scratchpad1 = string.Empty;
-                            if (scddsfp.scratchPad2 != null)
-                                update.Scratchpad2 = scddsfp.scratchPad2;
-                            else
-                                update.Scratchpad2 = string.Empty;
-                            update.RequestedAltitude = scddsfp.requestedAltitude;
-                            update.WakeCategory = scddsfp.category;
-                            update.Destination = scddsfp.exitFix;
-                            update.Origin = scddsfp.entryFix;
-                            update.ExitFix = scddsfp.exitFix;
-                            update.EntryFix = scddsfp.entryFix;
-                            update.FlightRules = scddsfp.flightRules;
-                            update.Callsign = scddsfp.acid.Trim();
-                            update.EquipmentSuffix = scddsfp.eqptSuffix;
-                            switch (scddsfp.ocr)
-                            {
-                                case "intrafacility handoff":
-                                case "normal handoff":
-                                case "manual":
-                                case "no change":
-                                case "consolidation":
-                                case "directed handoff":
-                                    update.Owner = scddsfp.cps;
-                                    update.PendingHandoff = string.Empty;
-                                    break;
-                                case "pending":
-                                    update.PendingHandoff = scddsfp.cps;
-                                    break;
-                            }
-                            if (track != null)
-                                update.AssociatedTrack = track.FirstOrDefault();
-                            flightPlan.UpdateFlightPlan(update);
-                        }
-                        else
-                            continue;
-                        
-                        }
-
-                    }
-                
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(message);
-                }
-
+                Task.Run(() => ParseMessage(message));
             }
             return true;
         }

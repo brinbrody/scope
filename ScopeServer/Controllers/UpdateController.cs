@@ -70,7 +70,7 @@ namespace ScopeServer.Controllers
                         await writer.WriteLineAsync(update.SerializeToJsonAsync().Result);
                     }
                 }
-                System.Threading.Thread.Sleep(100);
+                
             }
         }
         [HttpGet]
@@ -105,18 +105,20 @@ namespace ScopeServer.Controllers
         }
         private void AddFacilityWatchers(Facility facility)
         {
-            foreach (Track track in facility.Tracks)
-            {
-                lock(PendingUpdates)
-                    PendingUpdates.Add(track.GetCompleteTrackUpdate());
-                track.Updated += UpdateReceived;
-            }
-            foreach (FlightPlan flightPlan in facility.FlightPlans)
-            {
-                lock (PendingUpdates)
-                    PendingUpdates.Add(flightPlan.GetCompleteFlightPlanUpdate());
-                flightPlan.Updated += UpdateReceived;
-            }
+            lock (facility.Tracks)
+                foreach (Track track in facility.Tracks)
+                {
+                    lock(PendingUpdates)
+                        PendingUpdates.Add(track.GetCompleteTrackUpdate());
+                    track.Updated += UpdateReceived;
+                }
+            lock (facility.FlightPlans)
+                foreach (FlightPlan flightPlan in facility.FlightPlans)
+                {
+                    lock (PendingUpdates)
+                        PendingUpdates.Add(flightPlan.GetCompleteFlightPlanUpdate());
+                    flightPlan.Updated += UpdateReceived;
+                }
             facility.Tracks.CollectionChanged += CollectionChanged;
             facility.FlightPlans.CollectionChanged += CollectionChanged;
         }
@@ -205,13 +207,17 @@ namespace ScopeServer.Controllers
 
         private static void GarbageCollectionTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            foreach (Facility facility in Facilities)
-            {
-                lock(facility.Tracks)
-                    facility.Tracks.Where(track => track.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.Tracks.Remove(x));
-                lock (facility.FlightPlans)
-                    facility.FlightPlans.Where(flightPlan => flightPlan.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.FlightPlans.Remove(x));
-            }
+            lock(Facilities)
+                foreach (Facility facility in Facilities)
+                {
+                    lock (facility)
+                    {
+                        lock(facility.Tracks)
+                            facility.Tracks.Where(track => track.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.Tracks.Remove(x));
+                        lock (facility.FlightPlans)
+                            facility.FlightPlans.Where(flightPlan => flightPlan.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.FlightPlans.Remove(x));
+                    }
+                }
         }
 
         public static void LoadFacilities()

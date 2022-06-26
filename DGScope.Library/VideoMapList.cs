@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 
 using System.Linq;
 using System.IO;
+using System.Collections.ObjectModel;
 
 namespace DGScope.Library
 {
@@ -54,7 +55,8 @@ namespace DGScope.Library
         public static VideoMapList DeserializeFromJsonFile(string filename)
         {
             string json = File.ReadAllText(filename);
-            return GeoJSONMapExporter.GeoJSONToMaps(json);
+            var name = Path.GetFileNameWithoutExtension(filename);
+            return GeoJSONMapExporter.GeoJSONToMaps(json, name);
         }
         public static VideoMapList DeserializeFromJson(string jsonString)
         {

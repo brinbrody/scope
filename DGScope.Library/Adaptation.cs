@@ -10,10 +10,12 @@ namespace DGScope.Library
 {
     public class Adaptation
     {
+        private string videoMapFileName;
         public string Name { get; set; }
         [TypeConverter(typeof(ExpandableObjectConverter))]
         public GeoPoint FacilityCenter { get; set; } = new GeoPoint();
         public int MaxRange { get; set; } = 100;
+        public int TransitionAltitude { get; set; } = 18000;
         public double MagVar { get; set; } = 0;
         public ColorSet TCWColors { get; set; } = new ColorSet()
         {
@@ -195,7 +197,20 @@ namespace DGScope.Library
         [JsonIgnore]
         public VideoMapList VideoMaps { get; set; } = new VideoMapList();
         [Browsable(false)]
-        public string VideoMapFileName { get; set; }
+        public string VideoMapFileName 
+        {
+            get
+            {
+                return videoMapFileName;
+            }
+            set
+            {
+                if (videoMapFileName == value)
+                    return;
+                videoMapFileName = value;
+                VideoMaps = VideoMapList.DeserializeFromJsonFile(value);
+            }
+        }
         public static string SerializeToJson(Adaptation adaptation)
         {
             var options = new JsonSerializerOptions { WriteIndented = true };

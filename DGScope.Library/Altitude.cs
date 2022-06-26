@@ -1,21 +1,22 @@
-﻿using libmetar;
+﻿using Newtonsoft.Json;
 using System;
 
-namespace DGScope
+namespace DGScope.Library
 {
     public class Altitude
     {
         public int Value { get; set; }
         public AltitudeType AltitudeType { get; set; }
+        [JsonIgnore]
         public int TransitionAltitude { get; set; }
+        [JsonIgnore]
         public int PressureAltitude
         {
             get
             {
                 if (AltitudeType == AltitudeType.Pressure)
                     return Value;
-                var altimetervalue = Converter.Pressure(Altimeter, libmetar.Enums.PressureUnit.inHG).Value;
-                var correction = (int)((altimetervalue - 29.92) * 1000);
+                var correction = (int)((Altimeter.Value - 29.92) * 1000);
                 var newvalue = Value;
                 if (this.AltitudeType == AltitudeType.True)
                     newvalue -= correction;
@@ -26,14 +27,14 @@ namespace DGScope
                 UpdateAltitude(value, AltitudeType.Pressure);
             }
         }
+        [JsonIgnore]
         public int TrueAltitude
         {
             get
             {
                 if (AltitudeType == AltitudeType.True)
                     return Value;
-                var altimetervalue = Converter.Pressure(Altimeter, libmetar.Enums.PressureUnit.inHG).Value;
-                var correction = (int)((altimetervalue - 29.92) * 1000);
+                var correction = (int)((Altimeter.Value - 29.92) * 1000);
                 var newvalue = Value;
                 if (this.AltitudeType == AltitudeType.Pressure)
                     newvalue += correction;
@@ -47,9 +48,8 @@ namespace DGScope
 
         private object convertLockObject = new object();
 
-        public Altitude() { }
 
-        public void SetAltitudeProperties(int TransitionAltitude, Pressure Altimeter)
+        public void SetAltitudeProperties(int TransitionAltitude, Altimeter Altimeter)
         {
             this.TransitionAltitude = TransitionAltitude;
             this.Altimeter = Altimeter;
@@ -64,7 +64,7 @@ namespace DGScope
             }
         }
 
-        private Pressure Altimeter;
+        private Altimeter Altimeter;
         public Altitude ConvertTo(AltitudeType type)
         {
             lock (convertLockObject)
@@ -102,6 +102,29 @@ namespace DGScope
                 return string.Format("FL{0}", (Value / 100).ToString("D3"));
             }
             return string.Format("{0}ft.", Value);
+        }
+        public Altitude(int transitionAltitude, Altimeter altimeter) 
+        { 
+            Altimeter = altimeter;
+            TransitionAltitude = transitionAltitude;
+        }
+
+        public Altitude()
+        {
+        }
+
+        public Altitude Clone()
+        {
+            var newalt = new Altitude(this.TransitionAltitude, this.Altimeter);
+            newalt.Value = Value;
+            newalt.AltitudeType = AltitudeType;
+            return newalt;
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != typeof(Altitude))
+                return false;
+            return this.TrueAltitude == (obj as Altitude).TrueAltitude;
         }
     }
     public enum AltitudeType

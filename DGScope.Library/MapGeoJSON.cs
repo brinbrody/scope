@@ -72,10 +72,11 @@ namespace DGScope.Library
         public static VideoMapList GeoJSONFileToMaps(string path)
         {
             var json = File.ReadAllText(path);
-            return GeoJSONToMaps(json);
+            var name = Path.GetFileNameWithoutExtension(path);
+            return GeoJSONToMaps(json, name);
         }
 
-        public static VideoMapList GeoJSONToMaps(string json)
+        public static VideoMapList GeoJSONToMaps(string json, string name = null)
         {
             VideoMapList maps = new VideoMapList();
             var data = GeoJson.FromJson(json);
@@ -92,7 +93,10 @@ namespace DGScope.Library
                                 var geometry = feature.Geometry as LineString;
                                 map.Lines.AddRange(LineStringToLines(geometry));
                             }
-                            map.Name = "Imported map - " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString();
+                            if (name == null)
+                                map.Name = "Imported map - " + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString();
+                            else
+                                map.Name = name;
                             maps.Add(map);
                             break;
                         case GeoJsonType.GeometryCollection:

@@ -98,8 +98,9 @@ namespace ScopeWindow
             new BriteForm(CurrentPrefSet.BrightnessSettings).Show();
             new AdaptationForm(this).Show();
             new PropertyForm(this).Show();
-
+            GenerateVideoMapVertexBuffer(Adaptation.VideoMaps);
         }
+
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
             if (e.OffsetY > 0 && CurrentPrefSet.DisplayRange > 1)
@@ -230,28 +231,29 @@ namespace ScopeWindow
             File.WriteAllText(filename, SerializeToJson(scopeWindow));
         }
         public static Shader Shader;
-        public int[] wxVertexBuffers;
-        public int[] wxVAOs = new int[Constants.MAX_WX_LEVELS];
+        public int[] wxVAOs;
+        public int[] wxBuffers;
         public void DrawWeather()
         {
             var wx = Adaptation.WeatherProcessor;
-            if (wxVertexBuffers == null)
+            if (wxVAOs == null)
             {
-                wxVertexBuffers = new int[wx.Levels.Length];
-                for (int i = 0; i < wxVertexBuffers.Length; i++)
-                {
-                    wxVertexBuffers[i] = GL.GenBuffer();
-                }
+                wxVAOs = new int[wx.Levels.Length];
+                GL.GenVertexArrays(wx.Levels.Length, wxVAOs);
             }
-            for (int i = 0; i < wxVertexBuffers.Length; i++)
+            if (wxBuffers == null)
             {
-                wxVAOs[i] = GL.GenVertexArray();
+                wxBuffers = new int[wx.Levels.Length];
+                GL.GenBuffers(wx.Levels.Length, wxBuffers);
+            }
+            for (int i = 0; i < wxVAOs.Length; i++)
+            {
                 var vertexarray = wx.GetPolygons(i);
-                
+                var buffer = wxBuffers[i];
                 if (vertexarray.Length > 0)
                 {
                     GL.BindVertexArray(wxVAOs[i]);
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, wxVertexBuffers[i]);
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, buffer);
                     GL.BufferData(BufferTarget.ArrayBuffer, vertexarray.Length * sizeof(double), vertexarray, BufferUsageHint.DynamicDraw);
 
                     GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Double, false, 3 * sizeof(double), 0);
@@ -266,7 +268,6 @@ namespace ScopeWindow
         public void DrawVideoMaps()
         {
             var maps = Adaptation.VideoMaps;
-            GenerateVideoMapVertexBuffer(maps);
             foreach (var map in maps.Where(x => x.Category == MapCategory.B))
             {
                 if (CurrentPrefSet.DisplayedMaps.Contains(map.Number))
@@ -286,34 +287,37 @@ namespace ScopeWindow
 
 
 
-        public static void GenerateVideoMapVertexBuffer(VideoMapList maps)
+        public static void GenerateVideoMapVertexBuffer(IEnumerable<VideoMap> maps)
         {
-            foreach (var map in maps.Where(x => x.VertexBuffer == 0))
+            maps.Where(x => x.VertexBuffer == 0).ToList().ForEach(map => GenerateVideoMapVertexBuffer(map));
+        }
+        public static void GenerateVideoMapVertexBuffer(VideoMap map)
+        {
+            List<double> vertices = new List<double>();
+            foreach (var line in map.Lines)
             {
-                List<double> vertices = new List<double>();
-                foreach (var line in map.Lines)
-                {
-                    vertices.Add(line.End1.Longitude);
-                    vertices.Add(line.End1.Latitude);
-                    vertices.Add(0.0f);
-                    vertices.Add(line.End2.Longitude);
-                    vertices.Add(line.End2.Latitude);
-                    vertices.Add(0.0f);
-                }
-                var vertexarray = vertices.ToArray();
-                var buffer = GL.GenBuffer();
-                map.VertexBuffer = GL.GenVertexArray();
-                GL.BindVertexArray(map.VertexBuffer);
-                GL.BindBuffer(BufferTarget.ArrayBuffer, buffer);
-                GL.BufferData(BufferTarget.ArrayBuffer, vertexarray.Length * sizeof(double), vertexarray, BufferUsageHint.StaticDraw);
-                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Double, false, 3 * sizeof(double), 0);
-                GL.EnableVertexAttribArray(0);
-                GL.BindVertexArray(0);
+                vertices.Add(line.End1.Longitude);
+                vertices.Add(line.End1.Latitude);
+                vertices.Add(0.0f);
+                vertices.Add(line.End2.Longitude);
+                vertices.Add(line.End2.Latitude);
+                vertices.Add(0.0f);
             }
+            var vertexarray = vertices.ToArray();
+            var buffer = GL.GenBuffer();
+            map.VertexBuffer = GL.GenVertexArray();
+            GL.BindVertexArray(map.VertexBuffer);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, buffer);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertexarray.Length * sizeof(double), vertexarray, BufferUsageHint.StaticDraw);
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Double, false, 3 * sizeof(double), 0);
+            GL.EnableVertexAttribArray(0);
+            GL.BindVertexArray(0);
         }
 
         private void DrawVideoMap(VideoMap map, Color color)
         {
+            if (map.VertexBuffer == 0)
+                GenerateVideoMapVertexBuffer(map);
             DrawLines(map.VertexBuffer, map.Lines.Count, color);
         }
 

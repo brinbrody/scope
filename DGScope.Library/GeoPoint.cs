@@ -77,6 +77,14 @@ namespace DGScope.Library
 
         }
 
-        
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj.GetType() != typeof(GeoPoint))
+                return false;
+            var point = obj as GeoPoint;
+            return point.Latitude == Latitude && point.Longitude == Longitude;
+        }
     }
 }

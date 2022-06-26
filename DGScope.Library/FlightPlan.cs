@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,226 +7,189 @@ using System.Threading.Tasks;
 
 namespace DGScope.Library
 {
-    public class FlightPlan
+    public class FlightPlan :IUpdatable
     {
-        private string callsign;
-        private string? aircraftType;
-        private string? wakeCategory;
-        private string? flightRules;
-        private string? origin;
-        private string? destination;
-        private string? entryFix;
-        private string? exitFix;
-        private string? route;
-        private int requestedAltitude;
-        private string? scratchpad1;
-        private string? scratchpad2;
-        private string? runway;
-        private string? owner;
-        private string? pendingHandoff;
-        private string? squawk;
-        private LDRDirection? ldrDirection;
-        private Track? associatedTrack;
-        public string Callsign 
+        public string Callsign { get; private set; }
+        public string? AircraftType { get; private set; }
+        public string? WakeCategory { get; private set; }
+        public string? FlightRules { get; private set; }
+        public string? Origin { get; private set; }
+        public string? Destination { get; private set; }
+        public string? EntryFix { get; private set; }
+        public string? ExitFix { get; private set; }
+        public string? Route { get; private set; }
+        public int RequestedAltitude { get; private set; }
+        public string? Scratchpad1 { get; private set; }
+        public string? Scratchpad2 { get; private set; }
+        public string? Runway { get; private set; }
+        public string? Owner { get; private set; }
+        public string? PendingHandoff { get; private set; }
+        public string? AssignedSquawk { get; private set; }
+        public string? EquipmentSuffix { get; private set; }
+
+        public Guid Guid { get; set; } = Guid.NewGuid();
+        public DateTime LastMessageTime { get; private set; } = DateTime.MinValue;
+        public LDRDirection? LDRDirection { get; private set; }
+        public Track? AssociatedTrack { get; private set; }
+
+        public FlightPlan(string Callsign) 
         {
-            get => callsign;
-            set
-            {
-                if (callsign == value)
-                    return;
-                callsign = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
+            this.Callsign = Callsign;
+            Created?.Invoke(this, new FlightPlanUpdatedEventArgs(GetCompleteFlightPlanUpdate()));
         }
-        public string? AircraftType
+        public FlightPlan(Guid guid)
         {
-            get => aircraftType;
-            set
-            {
-                if (aircraftType == value)
-                    return;
-                aircraftType = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? WakeCategory
-        {
-            get => wakeCategory;
-            set
-            {
-                if (wakeCategory == value)
-                    return;
-                wakeCategory = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? FlightRules
-        {
-            get => flightRules;
-            set
-            {
-                if (flightRules == value)
-                    return;
-                flightRules = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? Origin
-        {
-            get => origin;
-            set
-            {
-                if (origin == value)
-                    return;
-                origin = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? Destination
-        {
-            get => destination;
-            set
-            {
-                if (destination == value)
-                    return;
-                destination = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? EntryFix
-        {
-            get => entryFix;
-            set
-            {
-                if (entryFix == value)
-                    return;
-                entryFix = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? ExitFix
-        {
-            get => exitFix;
-            set
-            {
-                if (exitFix == value)
-                    return;
-                exitFix = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? Route
-        {
-            get => route;
-            set
-            {
-                if (route == value)
-                    return;
-                route = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public int RequestedAltitude
-        {
-            get => requestedAltitude;
-            set
-            {
-                if (requestedAltitude == value)
-                    return;
-                requestedAltitude = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? Scratchpad1
-        {
-            get => scratchpad1;
-            set
-            {
-                if (scratchpad1 == value)
-                    return;
-                scratchpad1 = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? Scratchpad2
-        {
-            get => scratchpad2;
-            set
-            {
-                if (scratchpad2 == value)
-                    return;
-                scratchpad2 = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? Runway
-        {
-            get => runway;
-            set
-            {
-                if (runway == value)
-                    return;
-                runway = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? Owner
-        {
-            get => owner;
-            set
-            {
-                if (owner == value)
-                    return;
-                owner = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? PendingHandoff
-        {
-            get => pendingHandoff;
-            set
-            {
-                if (pendingHandoff == value)
-                    return;
-                pendingHandoff = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
-        }
-        public string? AssignedSquawk
-        {
-            get => squawk;
-            set
-            {
-                if (squawk == value)
-                    return;
-                squawk = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
+            this.Guid = guid;
+            Created?.Invoke(this, new FlightPlanUpdatedEventArgs(GetCompleteFlightPlanUpdate()));
         }
 
-        public LDRDirection? LDRDirection
+        public void UpdateFlightPlan(FlightPlanUpdate update)
         {
-            get => ldrDirection;
-            set
+            update.RemoveUnchanged();
+            if (update.TimeStamp < LastMessageTime)
+                return;
+            LastMessageTime = update.TimeStamp;
+            bool changed = false;
+            if (update.Callsign != null)
             {
-                if (ldrDirection == value)
-                    return;
-                ldrDirection = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
+                changed = true;
+                Callsign = update.Callsign;
             }
+            if (update.AircraftType != null)
+            {
+                changed = true;
+                AircraftType = update.AircraftType;
+            }
+            if (update.WakeCategory != null)
+            {
+                changed = true;
+                WakeCategory = update.WakeCategory;
+            }
+            if (update.FlightRules != null)
+            {
+                changed = true;
+                FlightRules = update.FlightRules;
+            }
+            if (update.Origin != null)
+            {
+                changed = true;
+                Origin = update.Origin;
+            }
+            if (update.Destination != null)
+            {
+                changed = true;
+                Destination = update.Destination;
+            }
+            if (update.EntryFix != null)
+            {
+                changed = true;
+                EntryFix = update.EntryFix;
+            }
+            if (update.ExitFix != null)
+            {
+                changed = true;
+                EntryFix = update.ExitFix;
+            }
+            if (update.Route != null)
+            {
+                changed = true;
+                Route = update.Route;
+            }
+            if (update.RequestedAltitude != null)
+            {
+                changed = true;
+                RequestedAltitude = (int)update.RequestedAltitude;
+            }
+            if (update.Scratchpad1 != null)
+            {
+                changed = true;
+                Scratchpad1 = update.Scratchpad1;
+            }
+            if (update.Scratchpad2 != null)
+            {
+                changed = true;
+                Scratchpad2 = update.Scratchpad2;
+            }
+            if (update.Runway != null)
+            {
+                changed = true;
+                Runway = update.Runway;
+            }
+            if (update.Owner != null)
+            {
+                changed = true;
+                Owner = update.Owner;
+            }
+            if (update.PendingHandoff != null)
+            {
+                changed = true;
+                PendingHandoff = update.PendingHandoff;
+            }
+            if (update.AssignedSquawk != null)
+            {
+                changed = true;
+                AssignedSquawk = update.AssignedSquawk;
+            }
+            if (update.LDRDirection != null)
+            {
+                changed = true;
+                LDRDirection = update.LDRDirection;
+            }
+            if (update.EquipmentSuffix != null)
+            {
+                changed = true;
+                EquipmentSuffix = update.EquipmentSuffix;
+            }
+            AssociatedTrack = update.AssociatedTrack;
+            if (changed)
+                Updated?.Invoke(this, new FlightPlanUpdatedEventArgs(update));
         }
-        public Track? AssociatedTrack
+        public FlightPlanUpdate GetCompleteFlightPlanUpdate()
         {
-            get => associatedTrack;
-            set
+            return new FlightPlanUpdate(this)
             {
-                if (associatedTrack == value)
-                    return;
-                associatedTrack = value;
-                FlightPlanUpdated?.Invoke(this, new EventArgs());
-            }
+                AircraftType = this.AircraftType,
+                WakeCategory = this.WakeCategory,
+                FlightRules = this.FlightRules,
+                Origin = this.Origin,
+                Destination = this.Destination,
+                EntryFix = this.EntryFix,
+                ExitFix = this.ExitFix,
+                Route = this.Route,
+                RequestedAltitude = this.RequestedAltitude,
+                Scratchpad1 = this.Scratchpad1,
+                Scratchpad2 = this.Scratchpad2,
+                Runway = this.Runway,
+                Owner = this.Owner,
+                PendingHandoff = this.PendingHandoff,
+                AssignedSquawk = this.AssignedSquawk,
+                LDRDirection = this.LDRDirection,
+                AssociatedTrack = this.AssociatedTrack,
+                Callsign = this.Callsign,
+                EquipmentSuffix = this.EquipmentSuffix,
+                TimeStamp = DateTime.Now,
+            };
         }
+        public override string ToString()
+        {
+            return Callsign;
+        }
+        public event EventHandler<UpdateEventArgs> Updated;
+        public event EventHandler<UpdateEventArgs> Created;
+    }
 
-        public EventHandler FlightPlanUpdated;
+    public class FlightPlanUpdatedEventArgs : UpdateEventArgs
+    {
+        public FlightPlan FlightPlan { get; private set; }
+        public FlightPlanUpdatedEventArgs(FlightPlan flightPlan)
+        {
+            FlightPlan = flightPlan;
+            Update = flightPlan.GetCompleteFlightPlanUpdate();
+        }
+        public FlightPlanUpdatedEventArgs(FlightPlanUpdate update)
+        {
+            FlightPlan = update.FlightPlan;
+            Update = update;
+        }
     }
 }

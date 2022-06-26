@@ -10,8 +10,8 @@ public partial class TATrackAndFlightPlan
 
     private string srcField;
 
-    private record[] recordField;
-
+    private stddsrecord[] recordField;
+    
     /// <remarks/>
     [System.Xml.Serialization.XmlElementAttribute(Namespace = "")]
     public string src
@@ -28,16 +28,15 @@ public partial class TATrackAndFlightPlan
 
     /// <remarks/>
     [System.Xml.Serialization.XmlElementAttribute("record", Namespace = "")]
-    public record[] record
-    {
-        get
-        {
+    public stddsrecord[]
+    record {
+        get {
             return this.recordField;
         }
-        set
-        {
-            this.recordField = value;
-        }
+set
+{
+    this.recordField = value;
+}
     }
 }
 
@@ -46,14 +45,59 @@ public partial class TATrackAndFlightPlan
 [System.ComponentModel.DesignerCategoryAttribute("code")]
 [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
 [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
-public partial class record
+public partial class stddsrecord
 {
+
+    private ushort recSeqNumField;
+
+    private string recSrcField;
+
+    private byte recTypeField;
 
     private recordTrack trackField;
 
     private recordFlightPlan flightPlanField;
 
     private recordEnhancedData enhancedDataField;
+
+    /// <remarks/>
+    public ushort recSeqNum
+    {
+        get
+        {
+            return this.recSeqNumField;
+        }
+        set
+        {
+            this.recSeqNumField = value;
+        }
+    }
+
+    /// <remarks/>
+    public string recSrc
+    {
+        get
+        {
+            return this.recSrcField;
+        }
+        set
+        {
+            this.recSrcField = value;
+        }
+    }
+
+    /// <remarks/>
+    public byte recType
+    {
+        get
+        {
+            return this.recTypeField;
+        }
+        set
+        {
+            this.recTypeField = value;
+        }
+    }
 
     /// <remarks/>
     public recordTrack track
@@ -140,7 +184,7 @@ public partial class recordTrack
 
     private ushort reportedBeaconCodeField;
 
-    private ushort reportedAltitudeField;
+    private int reportedAltitudeField;
 
     /// <remarks/>
     public ushort trackNum
@@ -390,7 +434,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public ushort reportedAltitude
+    public int reportedAltitude
     {
         get
         {
@@ -416,11 +460,13 @@ public partial class recordFlightPlan
 
     private byte rnavField;
 
+    private string scratchPad1Field;
+
+    private string scratchPad2Field;
+
     private string cpsField;
 
     private string runwayField;
-    private string scratchPad1Field;
-    private string scratchPad2Field;
 
     private ushort assignedBeaconCodeField;
 
@@ -442,6 +488,8 @@ public partial class recordFlightPlan
 
     private string flightRulesField;
 
+    private string rawFlightRulesField;
+
     private string typeField;
 
     private ushort ptdTimeField;
@@ -455,7 +503,7 @@ public partial class recordFlightPlan
     private string lldField;
 
     private string eCIDField;
-
+    private string eqptSuffixField;
     /// <remarks/>
     public ushort sfpn
     {
@@ -496,6 +544,32 @@ public partial class recordFlightPlan
     }
 
     /// <remarks/>
+    public string scratchPad1
+    {
+        get
+        {
+            return this.scratchPad1Field;
+        }
+        set
+        {
+            this.scratchPad1Field = value;
+        }
+    }
+
+    /// <remarks/>
+    public string scratchPad2
+    {
+        get
+        {
+            return this.scratchPad2Field;
+        }
+        set
+        {
+            this.scratchPad2Field = value;
+        }
+    }
+
+    /// <remarks/>
     public string cps
     {
         get
@@ -518,28 +592,6 @@ public partial class recordFlightPlan
         set
         {
             this.runwayField = value;
-        }
-    }
-    public string scratchPad1
-    {
-        get
-        {
-            return this.scratchPad1Field;
-        }
-        set
-        {
-            this.scratchPad1Field = value;
-        }
-    }
-    public string scratchPad2
-    {
-        get
-        {
-            return this.scratchPad2Field;
-        }
-        set
-        {
-            this.scratchPad2Field = value;
         }
     }
 
@@ -674,6 +726,19 @@ public partial class recordFlightPlan
     }
 
     /// <remarks/>
+    public string rawFlightRules
+    {
+        get
+        {
+            return this.rawFlightRulesField;
+        }
+        set
+        {
+            this.rawFlightRulesField = value;
+        }
+    }
+
+    /// <remarks/>
     public string type
     {
         get
@@ -761,6 +826,17 @@ public partial class recordFlightPlan
         set
         {
             this.eCIDField = value;
+        }
+    }
+    public string eqptSuffix
+    {
+        get
+        {
+            return this.eqptSuffixField;
+        }
+        set
+        {
+            this.eqptSuffixField = value;
         }
     }
 }

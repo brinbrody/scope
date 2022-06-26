@@ -19,6 +19,15 @@ namespace DGScope.Library
 
         public double[] GetPolygons(int level, bool max = false)
         {
+            Task.Run(() => GeneratePolygons(level, max));
+            
+            if (vertices[level] == null)
+                return Array.Empty<double>();
+            return vertices[level];
+        }
+
+        public void GeneratePolygons(int level, bool max = false)
+        {
             bool lockTaken = false;
             if (vertexLockObj[level] == null)
                 vertexLockObj[level] = new object();
@@ -27,7 +36,38 @@ namespace DGScope.Library
                 Monitor.TryEnter(vertexLockObj[level], ref lockTaken);
                 if (lockTaken)
                 {
-                    Task.Run(() => GeneratePolygons(level, max));
+                    if (Receivers.Count == 0 || Levels == null)
+                    {
+                        vertices[level] = Array.Empty<double>();
+                    }
+                    else if (Receivers.Count > 1)
+                    {
+                        throw new NotImplementedException("Only one weather receiver currently supported.");
+                    }
+                    var polygons = Receivers[0].GetPolygons();
+                    if (!max)
+                        max = level == Levels.Length - 1;
+                    var polylist = new List<WeatherPoly>();
+                    for (int i = 0; i < polygons.Length; i++)
+                    {
+                        if (polygons[i].dBz < Levels[level].MinDbz)
+                            continue;
+                        else if (!max)
+                            if (polygons[i].dBz >= Levels[level + 1].MinDbz)
+                                continue;
+                        polylist.Add(polygons[i]);
+                    }
+                    double[] newvertices = new double[polylist.Count * 12];
+                    for (int i = 0; i < polylist.Count; i++)
+                    {
+                        for (int j = 0; j < 4; j++)
+                        {
+                            newvertices[(12 * i) + (3 * j)] = polylist[i].Points[j].Longitude;
+                            newvertices[(12 * i) + (3 * j) + 1] = polylist[i].Points[j].Latitude;
+                            newvertices[(12 * i) + (3 * j) + 2] = 0;
+                        }
+                    }
+                    vertices[level] = newvertices;
                 }
             }
             finally
@@ -37,45 +77,8 @@ namespace DGScope.Library
                     Monitor.Exit(vertexLockObj[level]);
                 }
             }
-            if (vertices[level] == null)
-                return Array.Empty<double>();
-            return vertices[level];
-        }
-
-        public void GeneratePolygons(int level, bool max = false)
-        {
-            if (Receivers.Count == 0 || Levels == null)
-            {
-                vertices[level] =  Array.Empty<double>();
-            }
-            else if (Receivers.Count > 1)
-            {
-                throw new NotImplementedException("Only one weather receiver currently supported.");
-            }
-            var polygons = Receivers[0].GetPolygons();
-            if (!max)
-                max = level == Levels.Length - 1;
-            var polylist = new List<WeatherPoly>();
-            for (int i = 0; i < polygons.Length; i++)
-            {
-                if (polygons[i].dBz < Levels[level].MinDbz)
-                    continue;
-                else if (!max)
-                    if (polygons[i].dBz >= Levels[level + 1].MinDbz)
-                        continue;
-                polylist.Add(polygons[i]);
-            }
-            double[] newvertices = new double[polylist.Count * 12];
-            for (int i = 0; i < polylist.Count; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    newvertices[(12 * i) + (3 * j)] = polylist[i].Points[j].Longitude;
-                    newvertices[(12 * i) + (3 * j) + 1] = polylist[i].Points[j].Latitude;
-                    newvertices[(12 * i) + (3 * j) + 2] = 0;
-                }
-            }
-            vertices[level] = newvertices;
+            
+            //Monitor.Exit(vertexLockObj[level]);
         }
     }
 

@@ -48,7 +48,7 @@ set
 public partial class stddsrecord
 {
 
-    private ushort recSeqNumField;
+    private uint recSeqNumField;
 
     private string recSrcField;
 
@@ -61,7 +61,7 @@ public partial class stddsrecord
     private recordEnhancedData enhancedDataField;
 
     /// <remarks/>
-    public ushort recSeqNum
+    public uint recSeqNum
     {
         get
         {
@@ -146,7 +146,7 @@ public partial class stddsrecord
 public partial class recordTrack
 {
 
-    private ushort trackNumField;
+    private uint trackNumField;
 
     private System.DateTime mrtTimeField;
 
@@ -162,17 +162,17 @@ public partial class recordTrack
 
     private decimal lonField;
 
-    private short vVertField;
+    private int vVertField;
 
-    private short vxField;
+    private int vxField;
 
-    private short vyField;
+    private int vyField;
 
-    private short vVertRawField;
+    private int vVertRawField;
 
-    private short vxRawField;
+    private int vxRawField;
 
-    private short vyRawField;
+    private int vyRawField;
 
     private byte frozenField;
 
@@ -182,12 +182,12 @@ public partial class recordTrack
 
     private byte adsbField;
 
-    private ushort reportedBeaconCodeField;
+    private uint reportedBeaconCodeField;
 
     private int reportedAltitudeField;
 
     /// <remarks/>
-    public ushort trackNum
+    public uint trackNum
     {
         get
         {
@@ -291,7 +291,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public short vVert
+    public int vVert
     {
         get
         {
@@ -304,7 +304,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public short vx
+    public int vx
     {
         get
         {
@@ -317,7 +317,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public short vy
+    public int vy
     {
         get
         {
@@ -330,7 +330,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public short vVertRaw
+    public int vVertRaw
     {
         get
         {
@@ -343,7 +343,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public short vxRaw
+    public int vxRaw
     {
         get
         {
@@ -356,7 +356,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public short vyRaw
+    public int vyRaw
     {
         get
         {
@@ -421,7 +421,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public ushort reportedBeaconCode
+    public uint reportedBeaconCode
     {
         get
         {
@@ -454,7 +454,7 @@ public partial class recordTrack
 public partial class recordFlightPlan
 {
 
-    private ushort sfpnField;
+    private uint sfpnField;
 
     private string ocrField;
 
@@ -468,9 +468,9 @@ public partial class recordFlightPlan
 
     private string runwayField;
 
-    private ushort assignedBeaconCodeField;
+    private uint assignedBeaconCodeField;
 
-    private ushort requestedAltitudeField;
+    private uint requestedAltitudeField;
 
     private string categoryField;
 
@@ -492,7 +492,7 @@ public partial class recordFlightPlan
 
     private string typeField;
 
-    private ushort ptdTimeField;
+    private uint ptdTimeField;
 
     private string statusField;
 
@@ -505,7 +505,7 @@ public partial class recordFlightPlan
     private string eCIDField;
     private string eqptSuffixField;
     /// <remarks/>
-    public ushort sfpn
+    public uint sfpn
     {
         get
         {
@@ -596,7 +596,7 @@ public partial class recordFlightPlan
     }
 
     /// <remarks/>
-    public ushort assignedBeaconCode
+    public uint assignedBeaconCode
     {
         get
         {
@@ -609,7 +609,7 @@ public partial class recordFlightPlan
     }
 
     /// <remarks/>
-    public ushort requestedAltitude
+    public uint requestedAltitude
     {
         get
         {
@@ -752,7 +752,7 @@ public partial class recordFlightPlan
     }
 
     /// <remarks/>
-    public ushort ptdTime
+    public uint ptdTime
     {
         get
         {

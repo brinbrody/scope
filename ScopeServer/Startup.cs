@@ -31,6 +31,7 @@ namespace ScopeServer
             services.Configure<KestrelServerOptions>(options =>
             {
                 options.AllowSynchronousIO = true;
+                options.ListenAnyIP(5000);
             });
             services.Configure<IISServerOptions>(options =>
             {

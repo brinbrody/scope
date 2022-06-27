@@ -52,7 +52,10 @@ namespace ScopeServer.Controllers
             this.Response.StatusCode = 200;
             this.Response.Headers.Add(HeaderNames.ContentType, "application/json");
             Settings.StartReceivers();
-            
+            if (this.Request.Headers.TryGetValue(HeaderNames.UserAgent, out var useragent))
+                Console.WriteLine(useragent.First());
+            else
+                Console.WriteLine("Get");
             SetFacilityID(facilityID);
             while (true)
             {

@@ -88,7 +88,8 @@ namespace DGScope.Receivers.FAA_STDDS
                             else
                             {
                                 var newtrack = new Track(GetFacility(data.src));
-                                trackLookup.Add($"{data.src}{record.track.trackNum}", newtrack.Guid);
+                                lock(trackLookup)
+                                    trackLookup.Add($"{data.src}{record.track.trackNum}", newtrack.Guid);
                                 track = new List<Track>();
                                 track.Add(newtrack);
                             }
@@ -130,7 +131,7 @@ namespace DGScope.Receivers.FAA_STDDS
                             update.Scratchpad2 = scddsfp.scratchPad2;
                         else
                             update.Scratchpad2 = string.Empty;
-                        update.RequestedAltitude = scddsfp.requestedAltitude;
+                        update.RequestedAltitude = (int)scddsfp.requestedAltitude;
                         update.WakeCategory = scddsfp.category;
                         update.Destination = scddsfp.exitFix;
                         update.Origin = scddsfp.entryFix;

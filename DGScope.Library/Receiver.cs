@@ -35,9 +35,9 @@ namespace DGScope.Receivers
             if (facilityID == null)
                 return null;
             facility = GetFacility(facilityID);
-            tracks = facility.Tracks.ToList();
             lock (facility.Tracks)
             {
+                tracks = facility.Tracks.ToList();
                 track = (from x in tracks where x.ModeSCode == icaoID select x).FirstOrDefault();
                 if (track == null)
                 {

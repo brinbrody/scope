@@ -59,16 +59,19 @@ namespace ScopeServer.Controllers
                 List<Update> sending;
                 lock (PendingUpdates)
                     sending = new List<Update>(PendingUpdates);
-                foreach (Update update in sending)
-                {
-                    lock (PendingUpdates)
-                        PendingUpdates.Remove(update);
-                    if (update == null)
-                        continue;
-                    using (StreamWriter writer = new StreamWriter(this.Response.Body))
+                if (sending.Count == 0)
+                    System.Threading.Thread.Sleep(100);
+                else
+                    foreach (Update update in sending)
                     {
-                        await writer.WriteLineAsync(update.SerializeToJsonAsync().Result);
-                    }
+                        lock (PendingUpdates)
+                            PendingUpdates.Remove(update);
+                        if (update == null)
+                            continue;
+                        using (StreamWriter writer = new StreamWriter(this.Response.Body))
+                        {
+                            await writer.WriteLineAsync(update.SerializeToJsonAsync().Result);
+                        }
                 }
                 
             }

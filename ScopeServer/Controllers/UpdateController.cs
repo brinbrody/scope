@@ -112,21 +112,17 @@ namespace ScopeServer.Controllers
         private void AddFacilityWatchers(Facility facility)
         {
             lock (facility.Tracks)
-                foreach (Track track in facility.Tracks)
+            {
+                lock (facility.FlightPlans)
                 {
-                    lock(PendingUpdates)
-                        PendingUpdates.Add(track.GetCompleteTrackUpdate());
-                    track.Updated += UpdateReceived;
+                    facility.Tracks.ToList().ForEach(x => PendingUpdates.Add(x.GetCompleteTrackUpdate()));
+                    facility.FlightPlans.ToList().ForEach(x => PendingUpdates.Add(x.GetCompleteFlightPlanUpdate()));
+                    facility.Tracks.ToList().ForEach(x => x.Updated += UpdateReceived);
+                    facility.FlightPlans.ToList().ForEach(x => x.Updated += UpdateReceived);
+                    facility.Tracks.CollectionChanged += CollectionChanged;
+                    facility.FlightPlans.CollectionChanged += CollectionChanged;
                 }
-            lock (facility.FlightPlans)
-                foreach (FlightPlan flightPlan in facility.FlightPlans)
-                {
-                    lock (PendingUpdates)
-                        PendingUpdates.Add(flightPlan.GetCompleteFlightPlanUpdate());
-                    flightPlan.Updated += UpdateReceived;
-                }
-            facility.Tracks.CollectionChanged += CollectionChanged;
-            facility.FlightPlans.CollectionChanged += CollectionChanged;
+            }
         }
         private void RemoveFacilityWatchers(Facility facility)
         {

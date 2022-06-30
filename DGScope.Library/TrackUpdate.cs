@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace DGScope.Library
 {
     public class TrackUpdate : Update
     {
-        private Guid trackGuid = Guid.NewGuid();
-        [JsonIgnore]
-        public Track Track { get; private set; }
         public Altitude? Altitude { get; set; }
         public int? GroundSpeed { get; set; }
         public int? GroundTrack { get; set; }
@@ -22,37 +20,26 @@ namespace DGScope.Library
         public string? Callsign { get; set; }
         public int? VerticalRate { get; set; }
         public int? ModeSCode { get; set; }
-        public override Guid Guid
-        {
-            get
-            {
-                if (Track != null)
-                    return Track.Guid;
-                return trackGuid;
-            }
-            set
-            {
-                trackGuid = value;
-            }
-        }
 
         public override UpdateType UpdateType => UpdateType.Track;
 
         public TrackUpdate(Track track, DateTime timestamp)
         {
-            Track = track;
+            Base = track;
             Altitude = track.Altitude.Clone();
             TimeStamp = timestamp;
         }
         public TrackUpdate(Track track)
         {
-            Track = track;
+            Base = track;
             Altitude = track.Altitude.Clone();
         }
         public TrackUpdate() { Altitude = new Altitude(); }
         public TrackUpdate(TrackUpdate trackUpdate, Track track)
         {
-            Track = track;
+            SetAllProperties(trackUpdate);
+            Base = track;
+            /*
             TimeStamp = trackUpdate.TimeStamp;
             Altitude = trackUpdate.Altitude;
             GroundTrack = trackUpdate.GroundTrack;
@@ -64,6 +51,7 @@ namespace DGScope.Library
             Callsign = trackUpdate.Callsign;
             VerticalRate = trackUpdate.VerticalRate;
             ModeSCode = trackUpdate.ModeSCode;
+            */
         }
 
         public string SerializeToJson()
@@ -84,28 +72,13 @@ namespace DGScope.Library
 
         public Update DeserializeFromJson(string json)
         {
-            return DeserializeFromJson(json, this.Track);
+            return DeserializeFromJson(json, Base as Track);
         }
-        public override void RemoveUnchanged()
+        public new void RemoveUnchanged()
         {
-            if (Altitude == null || Altitude.Equals(Track.Altitude))
-                Altitude = null;
-            if (GroundSpeed == Track.GroundSpeed)
-                GroundSpeed = null;
-            if (GroundTrack == Track.GroundTrack)
-                GroundTrack = null;
-            if (Ident == Track.Ident)
-                Ident = null;
-            if (IsOnGround == Track.IsOnGround)
-                IsOnGround = null;
-            if (Squawk == Track.Squawk)
-                Squawk = null;
-            if (Location == null || Location.Equals(Track.Location))
-                Location = null;
-            if (Callsign == Track.Callsign)
-                Callsign = null;
-            if (VerticalRate == Track.VerticalRate)
-                VerticalRate = null;
+            base.RemoveUnchanged();
+            var track = Base as Track;
+                ModeSCode = track.ModeSCode;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace DGScope.Library
@@ -7,14 +8,14 @@ namespace DGScope.Library
     public class Track : IUpdatable
     {
         private double rateofturn;
-        private DateTime lastLocationSetTime = DateTime.MinValue;
-        private DateTime lastTrackUpdate = DateTime.MinValue;
+        //private DateTime lastLocationSetTime = DateTime.MinValue;
+        //private DateTime lastTrackUpdate = DateTime.MinValue;
 
         public int ModeSCode { get; private set; }
         public string Squawk { get; private set; }
-        public GeoPoint Location { get; private set; }
+        public GeoPoint Location { get; private set; } = new GeoPoint();
         public string Callsign { get; private set; }
-        public Altitude Altitude { get; }
+        public Altitude Altitude { get; private set; }
         public int GroundSpeed { get; private set; }
         public int GroundTrack { get; private set; }
         public int VerticalRate { get; private set; }
@@ -25,31 +26,55 @@ namespace DGScope.Library
         
         public long LocationUpdateTime
         {
-            get => lastLocationSetTime.ToFileTimeUtc();
+            get
+            {
+                DateTime lastLocationSetTime;
+                if (!PropertyUpdatedTimes.TryGetValue(this.GetType().GetProperty("Location"), out lastLocationSetTime))
+                {
+                    lastLocationSetTime = DateTime.MinValue;
+                    return 0;
+                }
+                return lastLocationSetTime.ToFileTimeUtc();
+            }
         }
         public long GroundTrackUpdateTime
         {
-            get => lastTrackUpdate.ToFileTimeUtc();
+            get
+            {
+                DateTime lastTrackUpdate;
+                if (!PropertyUpdatedTimes.TryGetValue(this.GetType().GetProperty("Location"), out lastTrackUpdate))
+                { 
+                    lastTrackUpdate = DateTime.MinValue;
+                    return 0;
+                }
+                return lastTrackUpdate.ToFileTimeUtc();
+            }
         }
+
+        public Dictionary<PropertyInfo, DateTime> PropertyUpdatedTimes { get; } = new Dictionary<PropertyInfo, DateTime>();
+
         public Track(int modeS, Facility facility)
         {
             ModeSCode = modeS;
             Altitude = new Altitude(facility.Adaptation.TransitionAltitude, facility.Altimeter);
-            Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteTrackUpdate()));
+            Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteUpdate()));
         }
         public Track(Guid guid, Facility facility)
         {
             Guid = guid;
             Altitude = new Altitude(facility.Adaptation.TransitionAltitude, facility.Altimeter);
-            Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteTrackUpdate()));
+            Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteUpdate()));
         }
         public Track(Facility facility)
         {
             Altitude = new Altitude(facility.Adaptation.TransitionAltitude, facility.Altimeter);
-            Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteTrackUpdate()));
+            Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteUpdate()));
         }
         public bool SetGroundTrack (double Track, DateTime SetTime)
         {
+            DateTime lastTrackUpdate;
+            if (!PropertyUpdatedTimes.TryGetValue(this.GetType().GetProperty("Location"), out lastTrackUpdate))
+                lastTrackUpdate = DateTime.MinValue;
             if (lastTrackUpdate > SetTime)
                 return false;
             var diff = Track - GroundTrack;
@@ -70,21 +95,26 @@ namespace DGScope.Library
         }
         private bool SetLocation(GeoPoint Location, DateTime SetTime)
         {
+            DateTime lastLocationSetTime;
+            if (!PropertyUpdatedTimes.TryGetValue(this.GetType().GetProperty("Location"), out lastLocationSetTime))
+                lastLocationSetTime = DateTime.MinValue;
             if (lastLocationSetTime > SetTime)
                 return false;
-            lastLocationSetTime = SetTime;
             this.Location = Location;
+            if (!PropertyUpdatedTimes.TryAdd(GetType().GetProperty("Location"), SetTime))
+                PropertyUpdatedTimes[GetType().GetProperty("Location")] = SetTime;
             return true;
         }
         private bool SetLocation(double Latitude, double Longitude, DateTime SetTime)
         {
-            if (lastLocationSetTime > SetTime)
-                return false;
             var newlocation = new GeoPoint(Latitude, Longitude);
             return SetLocation(newlocation, SetTime);
         }
         public double ExtrapolateTrack()
         {
+            DateTime lastTrackUpdate;
+            if (!PropertyUpdatedTimes.TryGetValue(this.GetType().GetProperty("Location"), out lastTrackUpdate))
+                lastTrackUpdate = DateTime.MinValue;
             if (Math.Abs(rateofturn) > 5) // sanity check
             {
                 return GroundTrack;
@@ -94,6 +124,11 @@ namespace DGScope.Library
 
         public GeoPoint ExtrapolatePosition()
         {
+            if (Location == null)
+                return null;
+            DateTime lastLocationSetTime;
+            if (!PropertyUpdatedTimes.TryGetValue(this.GetType().GetProperty("Location"), out lastLocationSetTime))
+                lastLocationSetTime = DateTime.MinValue;
             var miles = GroundSpeed * (DateTime.UtcNow - lastLocationSetTime).TotalHours;
             var track = ExtrapolateTrack();
             var location = Location.FromPoint(miles, track);
@@ -102,11 +137,43 @@ namespace DGScope.Library
         public void UpdateTrack(TrackUpdate update)
         {
             update.RemoveUnchanged();
-            if (update.TimeStamp < LastMessageTime)
-                return;
-            LastMessageTime = update.TimeStamp;
-            bool changed = false;
+            if (update.TimeStamp > LastMessageTime)
+                LastMessageTime = update.TimeStamp;
 
+            bool changed = false;
+            foreach (var updateProperty in update.GetType().GetProperties())
+            {
+                PropertyInfo thisProperty = GetType().GetProperty(updateProperty.Name);
+                object updateValue = updateProperty.GetValue(update);
+                if (updateValue == null || thisProperty == null)
+                    continue;
+                if (!PropertyUpdatedTimes.TryGetValue(thisProperty, out DateTime lastUpdatedTime))
+                    PropertyUpdatedTimes.TryAdd(thisProperty, update.TimeStamp);
+                if (update.TimeStamp > lastUpdatedTime)
+                {
+                    if (thisProperty.CanWrite)
+                    {
+                        thisProperty.SetValue(this, updateValue);
+                        PropertyUpdatedTimes[thisProperty] = update.TimeStamp;
+                        changed = true;
+                        if (updateProperty.Name == "GroundTrack")
+                            SetGroundTrack((double)update.GroundTrack, update.TimeStamp);
+                        else if (updateProperty.Name == "Location")
+                            SetLocation(update.Location, update.TimeStamp);
+                    }
+                    else
+                    {
+                        switch (thisProperty.Name)
+                        {
+                            
+
+                        }
+                    }
+                }
+            }
+            if (changed)
+                Updated?.Invoke(this, new TrackUpdatedEventArgs(update));
+            return;
             if (update.ModeSCode != null)
             {
                 changed = true;
@@ -157,27 +224,18 @@ namespace DGScope.Library
                 changed = true;
                 this.Squawk = update.Squawk; 
             }
-            if (changed)
-                Updated?.Invoke(this, new TrackUpdatedEventArgs(update));
+            
         }
-        public TrackUpdate GetCompleteTrackUpdate()
+        public Update GetCompleteUpdate()
         {
             var location = ExtrapolatePosition();
             var groundtrack = (int)ExtrapolateTrack();
-            return new TrackUpdate(this)
-            {
-                Altitude = this.Altitude,
-                Callsign = this.Callsign,
-                TimeStamp = DateTime.UtcNow,
-                GroundSpeed = this.GroundSpeed,
-                GroundTrack = groundtrack,
-                Ident = this.Ident,
-                IsOnGround = this.IsOnGround,
-                Location = location,
-                VerticalRate = this.VerticalRate,
-                Squawk = this.Squawk,
-                ModeSCode = this.ModeSCode
-            };
+            var newUpdate = new TrackUpdate(this);
+            newUpdate.SetAllProperties();
+            newUpdate.Location = location;
+            newUpdate.GroundTrack = groundtrack;
+            newUpdate.TimeStamp = DateTime.Now;
+            return newUpdate;
 
         }
         public override string ToString()
@@ -195,11 +253,11 @@ namespace DGScope.Library
         public TrackUpdatedEventArgs(Track track)
         {
             Track = track;
-            Update = track.GetCompleteTrackUpdate();
+            Update = track.GetCompleteUpdate();
         }
-        public TrackUpdatedEventArgs(TrackUpdate update)
+        public TrackUpdatedEventArgs(Update update)
         {
-            Track = update.Track;
+            Track = update.Base as Track;
             Update = update;
         }
     }

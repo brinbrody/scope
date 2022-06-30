@@ -139,9 +139,9 @@ namespace DGScope.Receivers
             FlightPlan flightPlan;
             List<FlightPlan> flightPlans;
             Facility facility = GetFacility(facilityID);
-            flightPlans = facility.FlightPlans.ToList();
-            lock (flightPlans)
+            lock (facility.FlightPlans)
             {
+                flightPlans = facility.FlightPlans.ToList();
                 flightPlan = (from x in flightPlans where x.Callsign == callsign select x).FirstOrDefault();
                 if (flightPlan == null)
                 {

@@ -9,9 +9,6 @@ namespace DGScope.Library
 {
     public class FlightPlanUpdate : Update
     {
-        private Guid flightPlanGuid = new Guid();
-        [JsonIgnore]
-        public FlightPlan FlightPlan { get; private set; }
         public string Callsign { get; set; }
         public string? AircraftType { get; set; }
         public string? WakeCategory { get; set; }
@@ -41,34 +38,24 @@ namespace DGScope.Library
                 return null;
             }
         }
-        public override Guid Guid 
-        {
-            get
-            {
-                if (FlightPlan != null)
-                    return FlightPlan.Guid;
-                return flightPlanGuid;
-            }
-            set
-            {
-                flightPlanGuid = value;
-            }
-        }
 
         public override UpdateType UpdateType => UpdateType.Flightplan;
         public FlightPlanUpdate(FlightPlan flightPlan, DateTime timestamp)
         {
-            FlightPlan = flightPlan;
+            Base = flightPlan;
             TimeStamp = timestamp;
         }
         public FlightPlanUpdate(FlightPlan flightPlan)
         {
-            FlightPlan = flightPlan;
+            Base = flightPlan;
+            SetAllProperties();
         }
         public FlightPlanUpdate() { }
         public FlightPlanUpdate(FlightPlanUpdate update, FlightPlan flightPlan)
         {
-            FlightPlan = flightPlan;
+            SetAllProperties(update);
+            Base = flightPlan;
+            /*
             TimeStamp = update.TimeStamp;
             Callsign = update.Callsign;
             AircraftType = update.AircraftType;
@@ -89,44 +76,8 @@ namespace DGScope.Library
             LDRDirection = update.LDRDirection;
             EquipmentSuffix = update.EquipmentSuffix;
             AssociatedTrack = update.AssociatedTrack;
+            */
         }
 
-        public override void RemoveUnchanged()
-        {
-            if (AircraftType == FlightPlan.AircraftType)
-                AircraftType = null;
-            if (WakeCategory == FlightPlan.WakeCategory)
-                WakeCategory = null;
-            if (FlightRules == FlightPlan.FlightRules)
-                FlightRules = null;
-            if (Origin == FlightPlan.Origin)
-                Origin = null;
-            if (Destination == FlightPlan.Destination)
-                Destination = null;
-            if (EntryFix == FlightPlan.EntryFix)
-                EntryFix = null;
-            if (ExitFix == FlightPlan.ExitFix)
-                ExitFix = null;
-            if (Route == FlightPlan.Route)
-                Route = null;
-            if (RequestedAltitude == FlightPlan.RequestedAltitude)
-                RequestedAltitude = null;
-            if (Scratchpad1 == FlightPlan.Scratchpad1)
-                Scratchpad1 = null;
-            if (Scratchpad2 == FlightPlan.Scratchpad2)
-                Scratchpad2 = null;
-            if (Runway == FlightPlan.Runway)
-                Runway = null;
-            if (Owner == FlightPlan.Owner)
-                Owner = null;
-            if (PendingHandoff == FlightPlan.PendingHandoff)
-                PendingHandoff = null;
-            if (AssignedSquawk == FlightPlan.AssignedSquawk)
-                AssignedSquawk = null;
-            if (LDRDirection == FlightPlan.LDRDirection)
-                LDRDirection = null;
-            if (EquipmentSuffix == FlightPlan.EquipmentSuffix)
-                EquipmentSuffix = null;
-        }
     }
 }

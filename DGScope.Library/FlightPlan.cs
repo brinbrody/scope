@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,25 +32,47 @@ namespace DGScope.Library
         public DateTime LastMessageTime { get; private set; } = DateTime.MinValue;
         public LDRDirection? LDRDirection { get; private set; }
         public Track? AssociatedTrack { get; private set; }
-
+        public Dictionary<PropertyInfo, DateTime> PropertyUpdatedTimes { get; } = new Dictionary<PropertyInfo, DateTime>();
         public FlightPlan(string Callsign) 
         {
             this.Callsign = Callsign;
-            Created?.Invoke(this, new FlightPlanUpdatedEventArgs(GetCompleteFlightPlanUpdate()));
+            Created?.Invoke(this, new FlightPlanUpdatedEventArgs(GetCompleteUpdate()));
         }
         public FlightPlan(Guid guid)
         {
             this.Guid = guid;
-            Created?.Invoke(this, new FlightPlanUpdatedEventArgs(GetCompleteFlightPlanUpdate()));
+            Created?.Invoke(this, new FlightPlanUpdatedEventArgs(GetCompleteUpdate()));
         }
 
         public void UpdateFlightPlan(FlightPlanUpdate update)
         {
             update.RemoveUnchanged();
+            if (update.TimeStamp > LastMessageTime)
+                LastMessageTime = update.TimeStamp;
+
+            bool changed = false;
+            foreach (var updateProperty in update.GetType().GetProperties())
+            {
+                PropertyInfo thisProperty = GetType().GetProperty(updateProperty.Name);
+                object updateValue = updateProperty.GetValue(update);
+                if (updateValue == null || thisProperty == null)
+                    continue;
+                if (!PropertyUpdatedTimes.TryGetValue(thisProperty, out DateTime lastUpdatedTime))
+                    PropertyUpdatedTimes.TryAdd(thisProperty, update.TimeStamp);
+                if (update.TimeStamp > lastUpdatedTime && thisProperty.CanWrite)
+                {
+                    thisProperty.SetValue(this, updateValue);
+                    PropertyUpdatedTimes[thisProperty] = update.TimeStamp;
+                    changed = true;
+                }
+            }
+            if (changed)
+                Updated?.Invoke(this, new FlightPlanUpdatedEventArgs(update));
+            return;
+            update.RemoveUnchanged();
             if (update.TimeStamp < LastMessageTime)
                 return;
             LastMessageTime = update.TimeStamp;
-            bool changed = false;
             if (update.Callsign != null)
             {
                 changed = true;
@@ -144,31 +167,11 @@ namespace DGScope.Library
             if (changed)
                 Updated?.Invoke(this, new FlightPlanUpdatedEventArgs(update));
         }
-        public FlightPlanUpdate GetCompleteFlightPlanUpdate()
+        public Update GetCompleteUpdate()
         {
-            return new FlightPlanUpdate(this)
-            {
-                AircraftType = this.AircraftType,
-                WakeCategory = this.WakeCategory,
-                FlightRules = this.FlightRules,
-                Origin = this.Origin,
-                Destination = this.Destination,
-                EntryFix = this.EntryFix,
-                ExitFix = this.ExitFix,
-                Route = this.Route,
-                RequestedAltitude = this.RequestedAltitude,
-                Scratchpad1 = this.Scratchpad1,
-                Scratchpad2 = this.Scratchpad2,
-                Runway = this.Runway,
-                Owner = this.Owner,
-                PendingHandoff = this.PendingHandoff,
-                AssignedSquawk = this.AssignedSquawk,
-                LDRDirection = this.LDRDirection,
-                AssociatedTrack = this.AssociatedTrack,
-                Callsign = this.Callsign,
-                EquipmentSuffix = this.EquipmentSuffix,
-                TimeStamp = DateTime.Now,
-            };
+            var newUpdate = new FlightPlanUpdate(this);
+            newUpdate.SetAllProperties();
+            return newUpdate;
         }
         public override string ToString()
         {
@@ -184,11 +187,11 @@ namespace DGScope.Library
         public FlightPlanUpdatedEventArgs(FlightPlan flightPlan)
         {
             FlightPlan = flightPlan;
-            Update = flightPlan.GetCompleteFlightPlanUpdate();
+            Update = flightPlan.GetCompleteUpdate();
         }
-        public FlightPlanUpdatedEventArgs(FlightPlanUpdate update)
+        public FlightPlanUpdatedEventArgs(Update update)
         {
-            FlightPlan = update.FlightPlan;
+            FlightPlan = update.Base as FlightPlan;
             Update = update;
         }
     }

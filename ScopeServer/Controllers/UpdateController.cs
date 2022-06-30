@@ -80,7 +80,7 @@ namespace ScopeServer.Controllers
             }
         }
         [HttpGet]
-        [Route("{facilityID}/adaptation")]
+        [Route("{facilityID}/facilityState")]
         public void GetAdaptation(string facilityID)
         {
             this.Response.StatusCode = 200;
@@ -88,7 +88,7 @@ namespace ScopeServer.Controllers
             SetFacilityID(facilityID);
             using (StreamWriter writer = new StreamWriter(this.Response.Body))
             {
-                writer.Write(Adaptation.SerializeToJson(selectedFacility.Adaptation));
+                writer.Write(JsonConvert.SerializeObject(selectedFacility));
             }
         }
         [HttpPost]
@@ -115,8 +115,8 @@ namespace ScopeServer.Controllers
             {
                 lock (facility.FlightPlans)
                 {
-                    facility.Tracks.ToList().ForEach(x => PendingUpdates.Add(x.GetCompleteTrackUpdate()));
-                    facility.FlightPlans.ToList().ForEach(x => PendingUpdates.Add(x.GetCompleteFlightPlanUpdate()));
+                    facility.Tracks.ToList().ForEach(x => PendingUpdates.Add(x.GetCompleteUpdate()));
+                    facility.FlightPlans.ToList().ForEach(x => PendingUpdates.Add(x.GetCompleteUpdate()));
                     facility.Tracks.ToList().ForEach(x => x.Updated += UpdateReceived);
                     facility.FlightPlans.ToList().ForEach(x => x.Updated += UpdateReceived);
                     facility.Tracks.CollectionChanged += CollectionChanged;
@@ -156,6 +156,7 @@ namespace ScopeServer.Controllers
                 case NotifyCollectionChangedAction.Add:
                     foreach (IUpdatable item in e.NewItems)
                     {
+                        PendingUpdates.Add(item.GetCompleteUpdate());
                         item.Updated += UpdateReceived;
                     }
                     break;

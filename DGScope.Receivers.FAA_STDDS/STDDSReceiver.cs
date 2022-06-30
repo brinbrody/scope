@@ -83,16 +83,19 @@ namespace DGScope.Receivers.FAA_STDDS
                             track = GetTracks(address, data.src);
                         else
                         {
-                            if (trackLookup.TryGetValue($"{data.src}{record.track.trackNum}", out Guid guid))
-                                track = GetTracks(guid, data.src);
-                            else
+                            lock (trackLookup)
                             {
-                                var newtrack = new Track(GetFacility(data.src));
-                                lock(trackLookup)
+                                if (trackLookup.TryGetValue($"{data.src}{record.track.trackNum}", out Guid guid))
+                                    track = GetTracks(guid, data.src);
+                                else
+                                {
+                                    var newtrack = new Track(GetFacility(data.src));
                                     trackLookup.Add($"{data.src}{record.track.trackNum}", newtrack.Guid);
-                                track = new List<Track>();
-                                track.Add(newtrack);
+                                    track = new List<Track>();
+                                    track.Add(newtrack);
+                                }
                             }
+                            
                         }
                     }
                     if (track != null && record.track != null)

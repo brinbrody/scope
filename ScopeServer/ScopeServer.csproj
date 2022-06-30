@@ -9,5 +9,11 @@
     <ProjectReference Include="..\DGScope.Receivers.FAA_STDDS\DGScope.Receivers.FAA_STDDS.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="scds.cert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 
 </Project>

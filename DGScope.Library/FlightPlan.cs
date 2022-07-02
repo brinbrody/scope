@@ -47,8 +47,7 @@ namespace DGScope.Library
         public void UpdateFlightPlan(FlightPlanUpdate update)
         {
             update.RemoveUnchanged();
-            if (update.TimeStamp > LastMessageTime)
-                LastMessageTime = update.TimeStamp;
+            
 
             bool changed = false;
             foreach (var updateProperty in update.GetType().GetProperties())
@@ -67,7 +66,11 @@ namespace DGScope.Library
                 }
             }
             if (changed)
+            {
+                if (update.TimeStamp > LastMessageTime)
+                    LastMessageTime = update.TimeStamp;
                 Updated?.Invoke(this, new FlightPlanUpdatedEventArgs(update));
+            }
             return;
             update.RemoveUnchanged();
             if (update.TimeStamp < LastMessageTime)

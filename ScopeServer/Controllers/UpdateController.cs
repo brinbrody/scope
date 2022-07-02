@@ -22,6 +22,7 @@ namespace ScopeServer.Controllers
         List<Update> PendingUpdates = new List<Update>();
         Facility selectedFacility;
         string selectedFacilityID;
+        DateTime stateSent;
         
         [HttpGet]
         [Route("aircraft.geojson/{facilityID}")]
@@ -123,6 +124,7 @@ namespace ScopeServer.Controllers
                     facility.FlightPlans.CollectionChanged += CollectionChanged;
                 }
             }
+            stateSent = DateTime.UtcNow;
         }
         private void RemoveFacilityWatchers(Facility facility)
         {
@@ -171,6 +173,8 @@ namespace ScopeServer.Controllers
 
         private void UpdateReceived(object sender, UpdateEventArgs e)
         {
+            if (stateSent > DateTime.UtcNow)
+                return;
             lock (PendingUpdates)
                 PendingUpdates.Add(e.Update);
         }
@@ -215,8 +219,8 @@ namespace ScopeServer.Controllers
                 {
                     lock (facility)
                     {
-                        lock(facility.Tracks)
-                            facility.Tracks.Where(track => track.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.Tracks.Remove(x));
+                        lock (facility.Tracks)
+                            facility.Tracks.Where(track => track.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x =>  facility.Tracks.Remove(x)) ;
                         lock (facility.FlightPlans)
                             facility.FlightPlans.Where(flightPlan => flightPlan.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.FlightPlans.Remove(x));
                     }

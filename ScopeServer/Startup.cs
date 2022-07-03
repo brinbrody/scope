@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace ScopeServer
@@ -18,8 +19,6 @@ namespace ScopeServer
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            Controllers.Settings.LoadFacilities();
-            Controllers.Settings.StartReceivers();
         }
 
         public IConfiguration Configuration { get; }
@@ -36,6 +35,23 @@ namespace ScopeServer
             {
                 options.AllowSynchronousIO = true;
             });
+            Configuration.GetSection(EmailSettings.Email).Bind(Settings.EmailSettings);
+            Configuration.GetSection("PatWatches").Bind(Settings.PatWatches);
+        }
+
+        private static void SendStartupEmail()
+        {
+            MailMessage message = new MailMessage(Settings.EmailSettings.FromAddress, Settings.EmailSettings.AlertAddress);
+            message.Subject = "ScopeServer Startup";
+            message.Body = string.Format("Startup of ScopeServer at {0}", DateTime.Now);
+            try
+            {
+                Settings.SmtpClient.Send(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

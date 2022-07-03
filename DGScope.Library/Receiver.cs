@@ -41,9 +41,8 @@ namespace DGScope.Receivers
                 track = (from x in tracks where x.ModeSCode == icaoID select x).FirstOrDefault();
                 if (track == null)
                 {
-                    track = new Track(icaoID, facility);
+                    track = new Track(icaoID);
                     facility.Tracks.Add(track);
-                    track.Altitude.SetAltitudeProperties(facility.Adaptation.TransitionAltitude, facility.Altimeter);
                 }
             }
 
@@ -58,7 +57,7 @@ namespace DGScope.Receivers
             if (track == null && facilityID != null)
             {
                 var facility = GetFacility(facilityID);
-                track = new Track(guid, GetFacility(facilityID));
+                track = new Track(guid);
                 lock (facility.Tracks)
                     facility.Tracks.Add(track);
             }

@@ -32,8 +32,9 @@ namespace DGScope.Library
                 if (!PropertyUpdatedTimes.TryGetValue(this.GetType().GetProperty("Location"), out lastLocationSetTime))
                 {
                     lastLocationSetTime = DateTime.MinValue;
-                    return 0;
                 }
+                if (lastLocationSetTime == DateTime.MinValue)
+                    return 0;
                 return lastLocationSetTime.ToFileTimeUtc();
             }
         }
@@ -53,21 +54,18 @@ namespace DGScope.Library
 
         public Dictionary<PropertyInfo, DateTime> PropertyUpdatedTimes { get; } = new Dictionary<PropertyInfo, DateTime>();
 
-        public Track(int modeS, Facility facility)
+        public Track(int modeS)
         {
             ModeSCode = modeS;
-            Altitude = new Altitude(facility.Adaptation.TransitionAltitude, facility.Altimeter);
             Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteUpdate()));
         }
-        public Track(Guid guid, Facility facility)
+        public Track(Guid guid)
         {
             Guid = guid;
-            Altitude = new Altitude(facility.Adaptation.TransitionAltitude, facility.Altimeter);
             Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteUpdate()));
         }
         public Track(Facility facility)
         {
-            Altitude = new Altitude(facility.Adaptation.TransitionAltitude, facility.Altimeter);
             Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteUpdate()));
         }
         public bool SetGroundTrack (double Track, DateTime SetTime)
@@ -177,56 +175,6 @@ namespace DGScope.Library
                 Updated?.Invoke(this, new TrackUpdatedEventArgs(update));
             }
             return;
-            if (update.ModeSCode != null)
-            {
-                changed = true;
-                this.ModeSCode = (int)update.ModeSCode;
-            }
-            if (update.Callsign != null)
-            {
-                changed = true;
-                this.Callsign = update.Callsign;
-            }
-            if (update.Altitude != null)
-            {
-                changed = true;
-                this.Altitude.TrueAltitude = update.Altitude.TrueAltitude;
-            }
-            if (update.GroundSpeed != null)
-            {
-                changed = true;
-                this.GroundSpeed = (int)update.GroundSpeed;
-            }
-            if (update.GroundTrack != null)
-            {
-                changed = true;
-                SetGroundTrack((double)update.GroundTrack, update.TimeStamp);
-            }
-            if (update.Ident != null)
-            {
-                changed = true;
-                this.Ident = (bool)update.Ident;
-            }
-            if (update.IsOnGround != null)
-            {
-                changed = true;
-                this.IsOnGround = (bool)update.IsOnGround;
-            }
-            if (update.Location != null)
-            {
-                changed = true;
-                SetLocation(update.Location, update.TimeStamp);
-            }
-            if (update.VerticalRate != null)
-            {
-                changed = true;
-                this.VerticalRate = (int)update.VerticalRate;
-            }
-            if (update.Squawk != null)
-            {
-                changed = true;
-                this.Squawk = update.Squawk; 
-            }
             
         }
         public Update GetCompleteUpdate()

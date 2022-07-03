@@ -26,13 +26,15 @@ namespace DGScope.Library
         public TrackUpdate(Track track, DateTime timestamp)
         {
             Base = track;
-            Altitude = track.Altitude.Clone();
+            if (track.Altitude != null)
+                Altitude = track.Altitude.Clone();
             TimeStamp = timestamp;
         }
         public TrackUpdate(Track track)
         {
             Base = track;
-            Altitude = track.Altitude.Clone();
+            if (track.Altitude != null)
+                Altitude = track.Altitude.Clone();
         }
         public TrackUpdate() { Altitude = new Altitude(); }
         public TrackUpdate(TrackUpdate trackUpdate, Track track)

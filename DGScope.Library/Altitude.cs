@@ -16,6 +16,8 @@ namespace DGScope.Library
             {
                 if (AltitudeType == AltitudeType.Pressure)
                     return Value;
+                if (Altimeter == null)
+                    throw new Exception("Altimeter was not set.");
                 var correction = (int)((Altimeter.Value - 29.92) * 1000);
                 var newvalue = Value;
                 if (this.AltitudeType == AltitudeType.True)
@@ -34,6 +36,8 @@ namespace DGScope.Library
             {
                 if (AltitudeType == AltitudeType.True)
                     return Value;
+                if (Altimeter == null)
+                    throw new Exception("Altimeter was not set.");
                 var correction = (int)((Altimeter.Value - 29.92) * 1000);
                 var newvalue = Value;
                 if (this.AltitudeType == AltitudeType.Pressure)
@@ -67,6 +71,7 @@ namespace DGScope.Library
         private Altimeter Altimeter;
         public Altitude ConvertTo(AltitudeType type)
         {
+            Altitude newAlt = new Altitude();
             lock (convertLockObject)
             {
                 if (type != AltitudeType)
@@ -75,16 +80,16 @@ namespace DGScope.Library
                     {
                         if (this.AltitudeType == AltitudeType.True)
                         {
-                            Value = PressureAltitude;
-                            AltitudeType = AltitudeType.Pressure;
+                            newAlt.Value = PressureAltitude;
+                            newAlt.AltitudeType = AltitudeType.Pressure;
                         }
                     }
                     else if (type == AltitudeType.True)
                     {
                         if (this.AltitudeType == AltitudeType.Pressure)
                         {
-                            Value = TrueAltitude;
-                            AltitudeType = AltitudeType.True;
+                            newAlt.Value = TrueAltitude;
+                            newAlt.AltitudeType = AltitudeType.True;
                         }
                     }
                     else
@@ -92,12 +97,16 @@ namespace DGScope.Library
                         throw new NotImplementedException();
                     }
                 }
-                return this;
+                else
+                {
+                    return Clone();
+                }
+                return newAlt;
             }
         }
         public override string ToString()
         {
-            if (ConvertTo(AltitudeType.True).Value > TransitionAltitude)
+            if (AltitudeType == AltitudeType.Pressure)
             {
                 return string.Format("FL{0}", (Value / 100).ToString("D3"));
             }

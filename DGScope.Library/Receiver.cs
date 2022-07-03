@@ -44,7 +44,6 @@ namespace DGScope.Receivers
                     track = new Track(icaoID, facility);
                     facility.Tracks.Add(track);
                     track.Altitude.SetAltitudeProperties(facility.Adaptation.TransitionAltitude, facility.Altimeter);
-                    Debug.WriteLine("Added airplane {0} from {1}", icaoID.ToString("X"), Name);
                 }
             }
 

@@ -77,8 +77,8 @@ namespace DGScope.Library
         public new void RemoveUnchanged()
         {
             base.RemoveUnchanged();
-            var track = Base as Track;
-                ModeSCode = track.ModeSCode;
+            //var track = Base as Track;
+            //    ModeSCode = track.ModeSCode;
         }
     }
 }

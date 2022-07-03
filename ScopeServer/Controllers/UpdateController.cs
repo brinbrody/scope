@@ -58,7 +58,7 @@ namespace ScopeServer.Controllers
             else
                 Console.WriteLine("Get");
             SetFacilityID(facilityID);
-            while (true)
+            while (!HttpContext.RequestAborted.IsCancellationRequested)
             {
                 List<Update> sending;
                 lock (PendingUpdates)
@@ -173,84 +173,12 @@ namespace ScopeServer.Controllers
 
         private void UpdateReceived(object sender, UpdateEventArgs e)
         {
-            if (stateSent > DateTime.UtcNow)
+            if (e.Update.TimeStamp < stateSent)
                 return;
             lock (PendingUpdates)
                 PendingUpdates.Add(e.Update);
         }
     }
 
-    public static class Settings
-    {
-        private static ObservableCollection<Facility> facilities;
-        private static ReceiverList receivers;
-        private static bool started;
-        private static System.Timers.Timer garbageCollectionTimer;
-        private static int garbageCollectionInterval = 30000; //30 seconds
-
-        public static ObservableCollection<Facility> Facilities
-        {
-            get
-            {
-                if (facilities == null)
-                    facilities = new ObservableCollection<Facility>();
-                return facilities;
-            }
-        }
-        public static void StartReceivers()
-        {
-            if (started)
-                return;
-            started = true;
-            foreach (var item in Receivers)
-            {
-                item.SetFacilityList(Facilities);
-                item.Start();
-            }
-            garbageCollectionTimer = new System.Timers.Timer(garbageCollectionInterval);
-            garbageCollectionTimer.Start();
-            garbageCollectionTimer.Elapsed += GarbageCollectionTimer_Elapsed;
-        }
-
-        private static void GarbageCollectionTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            lock(Facilities)
-                foreach (Facility facility in Facilities)
-                {
-                    lock (facility)
-                    {
-                        lock (facility.Tracks)
-                            facility.Tracks.Where(track => track.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x =>  facility.Tracks.Remove(x)) ;
-                        lock (facility.FlightPlans)
-                            facility.FlightPlans.Where(flightPlan => flightPlan.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.FlightPlans.Remove(x));
-                    }
-                }
-        }
-
-        public static void LoadFacilities()
-        {
-            foreach (var file in Directory.GetFiles(".","*.adaptjson"))
-            {
-                var newFacility = new Facility();
-                Facilities.Add(newFacility);
-                newFacility.Adaptation = Adaptation.DeserializeFromJsonFile(file);
-            }
-        }
-        public static ReceiverList Receivers
-        {
-            get
-            {
-                if (receivers == null)
-                {
-                    var json = File.ReadAllText("receivers.json");
-                    receivers = ReceiverList.DeserializerFromJson(json);
-                }
-                if (receivers == null)
-                {
-                    receivers = new ReceiverList();
-                }
-                return receivers;
-            }
-        }
-    }
+    
 }

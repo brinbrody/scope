@@ -56,9 +56,10 @@ namespace DGScope.Library
                 object updateValue = updateProperty.GetValue(update);
                 if (updateValue == null || thisProperty == null)
                     continue;
+                object thisValue = thisProperty.GetValue(this);
                 if (!PropertyUpdatedTimes.TryGetValue(thisProperty, out DateTime lastUpdatedTime))
                     PropertyUpdatedTimes.TryAdd(thisProperty, update.TimeStamp);
-                if (update.TimeStamp > lastUpdatedTime && thisProperty.CanWrite)
+                if (update.TimeStamp > lastUpdatedTime && thisProperty.CanWrite && !Equals(thisValue, updateValue))
                 {
                     thisProperty.SetValue(this, updateValue);
                     PropertyUpdatedTimes[thisProperty] = update.TimeStamp;

@@ -80,7 +80,7 @@ namespace DGScope.Library
                 var thisValue = property.GetValue(this);
                 if (baseProperty == null)
                     continue;
-                if (property.GetType() == typeof(Guid))
+                if (propertyName == "Guid")
                     continue; 
                 if (!property.CanWrite)
                     continue;

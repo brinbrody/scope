@@ -13,7 +13,7 @@ namespace DGScope.Library
 
         public int ModeSCode { get; private set; }
         public string Squawk { get; private set; }
-        public GeoPoint Location { get; private set; } = new GeoPoint();
+        public GeoPoint Location { get; private set; }
         public string Callsign { get; private set; }
         public Altitude Altitude { get; private set; }
         public int GroundSpeed { get; private set; }

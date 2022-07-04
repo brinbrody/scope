@@ -156,7 +156,7 @@ namespace DGScope.Receivers.FAA_STDDS
                         update.ExitFix = scddsfp.exitFix;
                         update.EntryFix = scddsfp.entryFix;
                         update.FlightRules = scddsfp.flightRules;
-                        //update.Callsign = scddsfp.acid.Trim();
+                        update.Callsign = scddsfp.acid.Trim();
                         update.EquipmentSuffix = scddsfp.eqptSuffix;
                         switch (scddsfp.ocr)
                         {

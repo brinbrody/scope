@@ -10,6 +10,7 @@ namespace DGScope.Library
 {
     public class TrackUpdate : Update
     {
+        public UpdateSource Source { get; set; }
         public Altitude? Altitude { get; set; }
         public int? GroundSpeed { get; set; }
         public int? GroundTrack { get; set; }
@@ -68,6 +69,11 @@ namespace DGScope.Library
             base.RemoveUnchanged();
             //var track = Base as Track;
             //    ModeSCode = track.ModeSCode;
+        }
+        public enum UpdateSource
+        {
+            FAA_STDDS,
+            ADS_B
         }
     }
 }

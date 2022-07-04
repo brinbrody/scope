@@ -65,6 +65,7 @@ namespace ScopeServer
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseWebSockets();
 
             app.UseEndpoints(endpoints =>
             {

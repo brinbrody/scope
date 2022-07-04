@@ -14,6 +14,9 @@ using DGScope.Receivers.FAA_STDDS;
 using Newtonsoft.Json;
 using System.Linq;
 using BAMCIS.GeoJSON;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
 
 namespace ScopeServer.Controllers
 {
@@ -24,34 +27,39 @@ namespace ScopeServer.Controllers
         string selectedFacilityID;
         DateTime stateSent;
         
+
         [HttpGet]
         [Route("{facilityID}/updates")]
         public async Task GetUpdates(string facilityID)
         {
-            this.Response.StatusCode = 200;
-            this.Response.Headers.Add(HeaderNames.ContentType, "application/json");
-            Settings.StartReceivers();
-            if (this.Request.Headers.TryGetValue(HeaderNames.UserAgent, out var useragent))
-                Console.WriteLine(useragent.First());
-            else
-                Console.WriteLine("Get");
-            SetFacilityID(facilityID);
-            while (!HttpContext.RequestAborted.IsCancellationRequested)
+            if (Response.HttpContext.WebSockets.IsWebSocketRequest)
             {
-                List<Update> sending;
-                lock (PendingUpdates)
+                SetFacilityID(facilityID);
+                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                StartUpdateSocket(webSocket);
+            }
+            else
+            {
+                this.Response.StatusCode = 200;
+                this.Response.Headers.Add(HeaderNames.ContentType, "application/json");
+                SetFacilityID(facilityID);
+                while (!HttpContext.RequestAborted.IsCancellationRequested)
                 {
-                    sending = new List<Update>(PendingUpdates.ToList());
-                    sending.ForEach(x => PendingUpdates.Remove(x));
-                }
-                sending.OrderBy(x => x.TimeStamp);
-                if (sending.Count == 0)
-                    System.Threading.Thread.Sleep(100);
-                else
-                {
-                    using (StreamWriter writer = new StreamWriter(this.Response.Body))
+                    List<Update> sending;
+                    lock (PendingUpdates)
                     {
-                        sending.ForEach(update => writer.WriteLineAsync(update.SerializeToJsonAsync().Result));
+                        sending = new List<Update>(PendingUpdates.ToList());
+                        sending.ForEach(x => PendingUpdates.Remove(x));
+                    }
+                    sending.OrderBy(x => x.TimeStamp);
+                    if (sending.Count == 0)
+                        System.Threading.Thread.Sleep(100);
+                    else
+                    {
+                        using (StreamWriter writer = new StreamWriter(this.Response.Body))
+                        {
+                            sending.ForEach(update => writer.WriteLineAsync(update.SerializeToJsonAsync().Result));
+                        }
                     }
                 }
             }
@@ -86,6 +94,36 @@ namespace ScopeServer.Controllers
             }
 
         }
+
+        private async Task StartUpdateSocket(WebSocket socket)
+        {
+            while (socket.State == WebSocketState.Connecting)
+                System.Threading.Thread.Sleep(1000);
+            while (socket.State == WebSocketState.Open)
+            {
+                List<Update> sending;
+                lock (PendingUpdates)
+                {
+                    sending = new List<Update>(PendingUpdates.ToList());
+                    sending.ForEach(x => PendingUpdates.Remove(x));
+                }
+                sending.OrderBy(x => x.TimeStamp);
+                if (sending.Count == 0)
+                    System.Threading.Thread.Sleep(100);
+                else
+                {
+                    foreach (var item in sending)
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(item.SerializeToJsonAsync().Result);
+                        var segment = new ArraySegment<byte>(bytes);
+                        await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+                    }
+                }
+            }
+            await socket.CloseAsync(WebSocketCloseStatus.Empty, "", CancellationToken.None);
+        }
+
+        
         private void AddFacilityWatchers(Facility facility)
         {
             lock (facility.Tracks)

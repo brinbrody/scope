@@ -276,7 +276,7 @@ namespace DGScope.Receivers.SBS
                 }
             }
             if (DataReceived != null)
-                DataReceived.BeginInvoke(this, _encode.GetString(dataBuffer, 0, bytes), new AsyncCallback(cbDataRecievedCallbackComplete), this);
+                DataReceived.Invoke(this, _encode.GetString(dataBuffer, 0, bytes));
         }
         private void cbDataRecievedCallbackComplete(IAsyncResult result)
         {

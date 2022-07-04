@@ -142,7 +142,8 @@ namespace DGScope.Library
         public void UpdateTrack(TrackUpdate update)
         {
             //update.RemoveUnchanged();
-            
+            if (update.Source == TrackUpdate.UpdateSource.ADS_B)
+                ;
 
             bool changed = false;
             foreach (var updateProperty in update.GetType().GetProperties())

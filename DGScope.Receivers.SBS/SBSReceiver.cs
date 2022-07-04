@@ -51,12 +51,13 @@ namespace DGScope.Receivers.SBS
         private void Client_DataReceived(EventDrivenTCPClient sender, object data)
         {
             rxBuffer += data;
-            rxBuffer.Replace("\r\n", "\n");
-            while (rxBuffer.Contains("\n"))
+            rxBuffer = rxBuffer.Replace("\r\n","\n");
+            while (rxBuffer.Contains('\n'))
             {
-                string message = rxBuffer.Substring(0, rxBuffer.IndexOf("\n"));
+                var len = rxBuffer.IndexOf('\n');
+                string message = rxBuffer.Substring(0, len);
                 string[] sbs_data = message.ToString().Split(',');
-                rxBuffer = rxBuffer.Substring(rxBuffer.IndexOf("\n") + 1);
+                rxBuffer = rxBuffer.Substring(rxBuffer.IndexOf('\n') + 1);
                 try
                 {
                     switch (sbs_data[0])

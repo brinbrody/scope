@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Nexrad\DGScope.Nexrad.csproj" />
+    <ProjectReference Include="..\VirtualRadar\VirtualRadar.csproj" />
   </ItemGroup>
 
 </Project>

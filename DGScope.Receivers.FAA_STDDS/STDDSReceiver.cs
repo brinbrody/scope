@@ -115,6 +115,7 @@ namespace DGScope.Receivers.FAA_STDDS
                     if (track != null && record.track != null)
                     {
                         TrackUpdate update = new TrackUpdate();
+                        update.Source = TrackUpdate.UpdateSource.FAA_STDDS;
                         update.TimeStamp = record.track.mrtTime;
                         if (record.track.reportedBeaconCode > 0)
                             update.Squawk = record.track.reportedBeaconCode.ToString("0000");

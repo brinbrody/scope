@@ -13,7 +13,7 @@ namespace DGScope.Library
     public abstract class Update
     {
         [JsonIgnore]
-        public IUpdatable Base { get;  protected set; }
+        public IUpdatable Base { get;  set; }
         private Guid baseGuid = Guid.NewGuid();
         public Guid Guid
         {

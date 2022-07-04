@@ -16,6 +16,7 @@ namespace DGScope.Receivers.FAA_STDDS
     public class STDDSReceiver : Receiver
     {
         private Dictionary<string, Guid> trackLookup = new Dictionary<string, Guid>();
+        private Dictionary<string, Guid> fpLookup = new Dictionary<string, Guid>();
         public string Host { get; set; }
         public string Username { get; set; }
         [PasswordPropertyText(true)]
@@ -72,31 +73,44 @@ namespace DGScope.Receivers.FAA_STDDS
                     List<Track> track = null;
                     FlightPlan flightPlan = null;
                     if (record.flightPlan != null)
-                        flightPlan = GetFlightPlan(record.flightPlan.acid, data.src);
+                    {
+                        lock (fpLookup)
+                        {
+                            if (fpLookup.TryGetValue($"{data.src}{record.flightPlan.sfpn}", out Guid guid))
+                                flightPlan = GetFlightPlan(guid, data.src);
+                            else
+                            {
+                                var facility = GetFacility(data.src);
+                                var newfp = new FlightPlan(record.flightPlan.acid.Trim());
+                                lock (facility.FlightPlans)
+                                {
+                                    facility.FlightPlans.Add(newfp);
+                                    fpLookup.Add($"{data.src}{record.flightPlan.sfpn}", newfp.Guid);
+                                }
+                                flightPlan = newfp;
+                            }
+                        }
+                    }
                     if (record.track != null)
                     {
-                        int address = 0;
-                        var addressString = record.track.acAddress;
-                        if (addressString != "")
-                            address = Convert.ToInt32(record.track.acAddress, 16);
-                        if (address != 0)
-                            track = GetTracks(address, data.src);
-                        else
+                        lock (trackLookup)
                         {
-                            lock (trackLookup)
+                            if (trackLookup.TryGetValue($"{data.src}{record.track.trackNum}", out Guid guid))
+                                track = GetTracks(guid, data.src);
+                            else
                             {
-                                if (trackLookup.TryGetValue($"{data.src}{record.track.trackNum}", out Guid guid))
-                                    track = GetTracks(guid, data.src);
-                                else
+                                var facility = GetFacility(data.src);
+                                var newtrack = new Track(facility);
+                                lock (facility.Tracks)
                                 {
-                                    var newtrack = new Track(GetFacility(data.src));
+                                    facility.Tracks.Add(newtrack);
                                     trackLookup.Add($"{data.src}{record.track.trackNum}", newtrack.Guid);
-                                    track = new List<Track>();
-                                    track.Add(newtrack);
                                 }
+                                track = new List<Track>();
+                                track.Add(newtrack);
                             }
-                            
                         }
+                            
                     }
                     if (track != null && record.track != null)
                     {
@@ -107,7 +121,9 @@ namespace DGScope.Receivers.FAA_STDDS
                         update.Location = new GeoPoint((double)record.track.lat, (double)record.track.lon);
                         update.GroundTrack = GroundTrack(record.track.vx, record.track.vy);
                         update.GroundSpeed = GroundSpeed(record.track.vx, record.track.vy);
-                        update.Altitude.TrueAltitude = record.track.reportedAltitude;
+                        if (update.Altitude == null)
+                            update.Altitude = new Altitude();
+                        update.Altitude.TrueAltitude = record.track.reportedAltitude; 
                         var addressString = record.track.acAddress;
                         int address = 0;
                         if (addressString != "")
@@ -118,7 +134,6 @@ namespace DGScope.Receivers.FAA_STDDS
                     }
                     if (flightPlan != null && record.flightPlan != null)
                     {
-
                         FlightPlanUpdate update = new FlightPlanUpdate(flightPlan);
                         update.TimeStamp = DateTime.UtcNow;
                         var scddsfp = record.flightPlan;
@@ -141,7 +156,7 @@ namespace DGScope.Receivers.FAA_STDDS
                         update.ExitFix = scddsfp.exitFix;
                         update.EntryFix = scddsfp.entryFix;
                         update.FlightRules = scddsfp.flightRules;
-                        update.Callsign = scddsfp.acid.Trim();
+                        //update.Callsign = scddsfp.acid.Trim();
                         update.EquipmentSuffix = scddsfp.eqptSuffix;
                         switch (scddsfp.ocr)
                         {
@@ -160,6 +175,8 @@ namespace DGScope.Receivers.FAA_STDDS
                         }
                         if (track != null)
                             update.AssociatedTrack = track.FirstOrDefault();
+                        if (track != null && track.Count > 1)
+                            ;
                         flightPlan.UpdateFlightPlan(update);
                     }
                     else

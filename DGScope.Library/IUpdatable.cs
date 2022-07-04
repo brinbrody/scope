@@ -12,7 +12,7 @@ namespace DGScope.Library
         DateTime LastMessageTime { get; }
         Guid Guid { get; }
         Update GetCompleteUpdate();
-        Dictionary<PropertyInfo, DateTime> PropertyUpdatedTimes { get;}
+        Dictionary<string, DateTime> PropertyUpdatedTimes { get;}
         event EventHandler<UpdateEventArgs> Updated;
         event EventHandler<UpdateEventArgs> Created;
     }

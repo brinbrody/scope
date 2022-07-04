@@ -32,7 +32,7 @@ namespace DGScope.Library
         public DateTime LastMessageTime { get; private set; } = DateTime.MinValue;
         public LDRDirection? LDRDirection { get; private set; }
         public Track? AssociatedTrack { get; private set; }
-        public Dictionary<PropertyInfo, DateTime> PropertyUpdatedTimes { get; } = new Dictionary<PropertyInfo, DateTime>();
+        public Dictionary<string, DateTime> PropertyUpdatedTimes { get; } = new Dictionary<string, DateTime>();
         public FlightPlan(string Callsign) 
         {
             this.Callsign = Callsign;
@@ -57,12 +57,12 @@ namespace DGScope.Library
                 if (updateValue == null || thisProperty == null)
                     continue;
                 object thisValue = thisProperty.GetValue(this);
-                if (!PropertyUpdatedTimes.TryGetValue(thisProperty, out DateTime lastUpdatedTime))
-                    PropertyUpdatedTimes.TryAdd(thisProperty, update.TimeStamp);
+                if (!PropertyUpdatedTimes.TryGetValue(thisProperty.Name, out DateTime lastUpdatedTime))
+                    PropertyUpdatedTimes.TryAdd(thisProperty.Name, update.TimeStamp);
                 if (update.TimeStamp > lastUpdatedTime && thisProperty.CanWrite && !Equals(thisValue, updateValue))
                 {
                     thisProperty.SetValue(this, updateValue);
-                    PropertyUpdatedTimes[thisProperty] = update.TimeStamp;
+                    PropertyUpdatedTimes[thisProperty.Name] = update.TimeStamp;
                     changed = true;
                 }
             }
@@ -73,103 +73,6 @@ namespace DGScope.Library
                 Updated?.Invoke(this, new FlightPlanUpdatedEventArgs(update));
             }
             return;
-            update.RemoveUnchanged();
-            if (update.TimeStamp < LastMessageTime)
-                return;
-            LastMessageTime = update.TimeStamp;
-            if (update.Callsign != null)
-            {
-                changed = true;
-                Callsign = update.Callsign;
-            }
-            if (update.AircraftType != null)
-            {
-                changed = true;
-                AircraftType = update.AircraftType;
-            }
-            if (update.WakeCategory != null)
-            {
-                changed = true;
-                WakeCategory = update.WakeCategory;
-            }
-            if (update.FlightRules != null)
-            {
-                changed = true;
-                FlightRules = update.FlightRules;
-            }
-            if (update.Origin != null)
-            {
-                changed = true;
-                Origin = update.Origin;
-            }
-            if (update.Destination != null)
-            {
-                changed = true;
-                Destination = update.Destination;
-            }
-            if (update.EntryFix != null)
-            {
-                changed = true;
-                EntryFix = update.EntryFix;
-            }
-            if (update.ExitFix != null)
-            {
-                changed = true;
-                EntryFix = update.ExitFix;
-            }
-            if (update.Route != null)
-            {
-                changed = true;
-                Route = update.Route;
-            }
-            if (update.RequestedAltitude != null)
-            {
-                changed = true;
-                RequestedAltitude = (int)update.RequestedAltitude;
-            }
-            if (update.Scratchpad1 != null)
-            {
-                changed = true;
-                Scratchpad1 = update.Scratchpad1;
-            }
-            if (update.Scratchpad2 != null)
-            {
-                changed = true;
-                Scratchpad2 = update.Scratchpad2;
-            }
-            if (update.Runway != null)
-            {
-                changed = true;
-                Runway = update.Runway;
-            }
-            if (update.Owner != null)
-            {
-                changed = true;
-                Owner = update.Owner;
-            }
-            if (update.PendingHandoff != null)
-            {
-                changed = true;
-                PendingHandoff = update.PendingHandoff;
-            }
-            if (update.AssignedSquawk != null)
-            {
-                changed = true;
-                AssignedSquawk = update.AssignedSquawk;
-            }
-            if (update.LDRDirection != null)
-            {
-                changed = true;
-                LDRDirection = update.LDRDirection;
-            }
-            if (update.EquipmentSuffix != null)
-            {
-                changed = true;
-                EquipmentSuffix = update.EquipmentSuffix;
-            }
-            AssociatedTrack = update.AssociatedTrack;
-            if (changed)
-                Updated?.Invoke(this, new FlightPlanUpdatedEventArgs(update));
         }
         public Update GetCompleteUpdate()
         {

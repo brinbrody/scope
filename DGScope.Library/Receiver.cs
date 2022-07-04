@@ -52,16 +52,24 @@ namespace DGScope.Receivers
         public Track GetTrack(Guid guid, string facilityID = null)
         {
             List<Track> tracks = new List<Track>();
-            Facilities.ToList().ForEach(facility => { lock (facility.Tracks) tracks.AddRange(facility.Tracks.Where(x => x.Guid == guid)); });
-            Track track = tracks.FirstOrDefault();
-            if (track == null && facilityID != null)
+            if (facilityID == null)
+                Facilities.ToList().ForEach(facility => { lock (facility.Tracks) tracks.AddRange(facility.Tracks.Where(x => x.Guid == guid)); });
+            else
             {
                 var facility = GetFacility(facilityID);
-                track = new Track(guid);
                 lock (facility.Tracks)
-                    facility.Tracks.Add(track);
+                {
+                    facility.Tracks.ToList().ForEach(track => tracks.AddRange(facility.Tracks.Where(x => x.Guid == guid)));
+                    Track track = tracks.FirstOrDefault();
+                    if (track == null)
+                    {
+                        track = new Track(guid);
+                        facility.Tracks.Add(track);
+                        tracks.Add(track);
+                    }
+                }
             }
-            return track;
+            return tracks.FirstOrDefault();
         }
         public List<Track> GetTracks (int modeSCode, GeoPoint trackLocation)
         {
@@ -82,7 +90,10 @@ namespace DGScope.Receivers
         }
         public List<Track> GetTracks(Guid guid, string facilityID = null)
         {
-            return new List<Track>() { GetTrack(guid, facilityID) };
+            var track = GetTrack(guid, facilityID);
+            if (track == null)
+                return null;
+            return new List<Track>() { track };
         }
         public FlightPlan GetFlightPlan(Guid guid)
         {
@@ -112,40 +123,47 @@ namespace DGScope.Receivers
         {
             if (guid == Guid.Empty)
                 return null;
+            Facility facility = null;
             FlightPlan flightPlan;
             List<FlightPlan> flightPlans = new List<FlightPlan>();
             lock (Facilities)
             {
                 Facilities.ToList().ForEach(facility => flightPlans.AddRange(facility.FlightPlans));
             }
-            lock (flightPlans)
+            if (!string.IsNullOrEmpty(facilityID))
             {
-                flightPlan = (from x in flightPlans where x.Guid == guid select x).FirstOrDefault();
-                if (flightPlan == null && facilityID != null)
+                facility = GetFacility(facilityID);
+                lock (facility.FlightPlans)
                 {
-                    flightPlan = new FlightPlan(guid);
-                    var facility = GetFacility(facilityID);
-                    facility.FlightPlans.Add(flightPlan);
+                    flightPlan = (from x in facility.FlightPlans where x.Guid == guid select x).FirstOrDefault();
+                    if (flightPlan == null)
+                    {
+                        flightPlan = new FlightPlan(guid);
+                        facility.FlightPlans.Add(flightPlan);
+                    }
                 }
             }
+            else
+                flightPlan = (from x in flightPlans where x.Guid == guid select x).FirstOrDefault();
             return flightPlan;
         }
         public FlightPlan GetFlightPlan(string callsign, string facilityID)
         {
-            if (facilityID == null || callsign == null)
+            if (string.IsNullOrEmpty(facilityID) || string.IsNullOrEmpty(callsign))
                 return null;
             FlightPlan flightPlan;
             List<FlightPlan> flightPlans;
             Facility facility = GetFacility(facilityID);
             lock (facility.FlightPlans)
             {
-                flightPlans = facility.FlightPlans.ToList();
-                flightPlan = (from x in flightPlans where x.Callsign == callsign select x).FirstOrDefault();
+                flightPlan = facility.FlightPlans.Where(x => x.Callsign == callsign).FirstOrDefault();
                 if (flightPlan == null)
                 {
                     flightPlan = new FlightPlan(callsign);
                     facility.FlightPlans.Add(flightPlan);
                 }
+                else
+                    ;
             }
             return flightPlan;
         }

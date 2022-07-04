@@ -36,24 +36,11 @@ namespace DGScope.Library
             if (track.Altitude != null)
                 Altitude = track.Altitude.Clone();
         }
-        public TrackUpdate() { Altitude = new Altitude(); }
+        public TrackUpdate() { }
         public TrackUpdate(TrackUpdate trackUpdate, Track track)
         {
             SetAllProperties(trackUpdate);
             Base = track;
-            /*
-            TimeStamp = trackUpdate.TimeStamp;
-            Altitude = trackUpdate.Altitude;
-            GroundTrack = trackUpdate.GroundTrack;
-            GroundSpeed = trackUpdate.GroundSpeed;
-            Ident = trackUpdate.Ident;
-            IsOnGround = trackUpdate.IsOnGround;
-            Squawk = trackUpdate.Squawk;
-            Location = trackUpdate.Location;
-            Callsign = trackUpdate.Callsign;
-            VerticalRate = trackUpdate.VerticalRate;
-            ModeSCode = trackUpdate.ModeSCode;
-            */
         }
 
         public string SerializeToJson()

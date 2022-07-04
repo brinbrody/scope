@@ -25,28 +25,6 @@ namespace ScopeServer.Controllers
         DateTime stateSent;
         
         [HttpGet]
-        [Route("aircraft.geojson/{facilityID}")]
-        public void GetAircraftGeoJson(string facilityID)
-        {
-            List<Feature> features = new List<Feature>();
-            foreach (Facility facility in Settings.Facilities.Where(x=> x.FacilityID == facilityID))
-            {
-                foreach (FlightPlan plan in facility.FlightPlans.Where(p => p.AssociatedTrack != null))
-                {
-                    Track track = plan.AssociatedTrack;
-                    Point location = new Point(new Position(track.Location.Longitude, track.Location.Latitude, track.Altitude.TrueAltitude * 0.3048 ));
-                    Feature plane = new Feature(location);
-                    plane.Properties.Add("callsign", plan.Callsign);
-                    plane.Properties.Add("altitude", (track.Altitude.TrueAltitude / 100).ToString().PadLeft(3, '0'));
-                    plane.Properties.Add("owner", plan.Owner);
-                    features.Add(plane);
-                }
-            }
-            GeoJson json = new FeatureCollection(features);
-            using (var writer = new StreamWriter(this.Response.Body))
-                writer.Write(json.ToJson());
-        }
-        [HttpGet]
         [Route("{facilityID}/updates")]
         public async Task GetUpdates(string facilityID)
         {
@@ -62,22 +40,20 @@ namespace ScopeServer.Controllers
             {
                 List<Update> sending;
                 lock (PendingUpdates)
-                    sending = new List<Update>(PendingUpdates);
+                {
+                    sending = new List<Update>(PendingUpdates.ToList());
+                    sending.ForEach(x => PendingUpdates.Remove(x));
+                }
+                sending.OrderBy(x => x.TimeStamp);
                 if (sending.Count == 0)
                     System.Threading.Thread.Sleep(100);
                 else
-                    foreach (Update update in sending)
+                {
+                    using (StreamWriter writer = new StreamWriter(this.Response.Body))
                     {
-                        lock (PendingUpdates)
-                            PendingUpdates.Remove(update);
-                        if (update == null)
-                            continue;
-                        using (StreamWriter writer = new StreamWriter(this.Response.Body))
-                        {
-                            await writer.WriteLineAsync(update.SerializeToJsonAsync().Result);
-                        }
+                        sending.ForEach(update => writer.WriteLineAsync(update.SerializeToJsonAsync().Result));
+                    }
                 }
-                
             }
         }
         [HttpGet]

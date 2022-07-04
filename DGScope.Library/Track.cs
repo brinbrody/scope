@@ -141,7 +141,7 @@ namespace DGScope.Library
         }
         public void UpdateTrack(TrackUpdate update)
         {
-            update.RemoveUnchanged();
+            //update.RemoveUnchanged();
             
 
             bool changed = false;
@@ -197,6 +197,10 @@ namespace DGScope.Library
             newUpdate.Location = location;
             if (groundtrack != null)
                 newUpdate.GroundTrack = (int)groundtrack;
+            else
+            {
+                newUpdate.GroundTrack = GroundTrack;
+            }
             newUpdate.TimeStamp = DateTime.Now;
             return newUpdate;
         }

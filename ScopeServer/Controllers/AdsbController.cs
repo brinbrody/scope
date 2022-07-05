@@ -63,6 +63,11 @@ namespace ScopeServer.Controllers
                 }
                 if (adsb != null)
                 {
+                    if (adsb.IdentifierAndCategory != null && adsb.IdentifierAndCategory.Identification != null)
+                    {
+                        trackUpdate.Callsign = adsb.IdentifierAndCategory.Identification.Trim();
+                        updated = true;
+                    }
                     if (adsb.AirbornePosition != null)
                     {
                         trackUpdate.IsOnGround = false;
@@ -125,7 +130,13 @@ namespace ScopeServer.Controllers
                 }
                 trackUpdate.Source = TrackUpdate.UpdateSource.ADS_B;
                 if (updated)
-                    tracks.ForEach(track => track.UpdateTrack(trackUpdate));
+                {
+                    foreach (Track track in tracks)
+                    {
+                        var newUpdate = new TrackUpdate(trackUpdate, track);
+                        track.UpdateTrack(newUpdate);
+                    }
+                }
             }
             return true;
         }

@@ -35,7 +35,7 @@ namespace DGScope.AdsbUploadClient
             });
             while (true)
             {
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(100);
                 SendUpdates(FetchUpdates());
             }
         }

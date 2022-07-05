@@ -20,7 +20,10 @@ namespace ScopeServer.Controllers
         [HttpPost]
         public void Post([FromBody] AdsbUpdate[] value)
         {
-            Task.Run(() => ParseAdsbUpdates(value));
+            if (!Response.HttpContext.WebSockets.IsWebSocketRequest)
+                Task.Run(() => ParseAdsbUpdates(value));
+            else
+                Console.WriteLine("Client at {0} tried a WebSocket, which is not implemented yet.", HttpContext.Connection.RemoteIpAddress);
         }
 
         

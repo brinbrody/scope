@@ -181,8 +181,6 @@ namespace DGScope.Library
                 if (update.TimeStamp > LastMessageTime)
                     LastMessageTime = update.TimeStamp;
                 Updated?.Invoke(this, new TrackUpdatedEventArgs(update));
-                if (update.GroundSpeed == 0 && update.GroundTrack == 0)
-                    ;
             }
             return;
             

@@ -96,7 +96,7 @@ namespace DGScope.Receivers.FAA_STDDS
                         lock (trackLookup)
                         {
                             if (trackLookup.TryGetValue($"{data.src}{record.track.trackNum}", out Guid guid))
-                                track = GetTracks(guid, data.src);
+                                track = GetTracks(guid);
                             else
                             {
                                 var facility = GetFacility(data.src);

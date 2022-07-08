@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -8,6 +9,7 @@ namespace DGScope.Library
     public class Track : IUpdatable
     {
         private double rateofturn;
+        private DateTime created = DateTime.UtcNow;
         //private DateTime lastLocationSetTime = DateTime.MinValue;
         //private DateTime lastTrackUpdate = DateTime.MinValue;
 
@@ -21,7 +23,7 @@ namespace DGScope.Library
         public int? VerticalRate { get; private set; }
         public bool? Ident { get; private set; }
         public bool? IsOnGround { get; private set; }
-        public DateTime LastMessageTime { get; private set; }
+        public DateTime LastMessageTime { get; private set; } = DateTime.UtcNow;
         public Guid Guid { get; set; } = Guid.NewGuid();
         
         public long LocationUpdateTime
@@ -65,7 +67,7 @@ namespace DGScope.Library
             Guid = guid;
             Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteUpdate()));
         }
-        public Track(Facility facility)
+        public Track()
         {
             Created?.Invoke(this, new TrackUpdatedEventArgs(GetCompleteUpdate()));
         }
@@ -141,10 +143,8 @@ namespace DGScope.Library
         }
         public void UpdateTrack(TrackUpdate update)
         {
-            //update.RemoveUnchanged();
-            if (update.Source == TrackUpdate.UpdateSource.ADS_B)
-                ;
-
+            if (update.TimeStamp > LastMessageTime)
+                LastMessageTime = update.TimeStamp;
             bool changed = false;
             foreach (var updateProperty in update.GetType().GetProperties())
             {
@@ -178,8 +178,6 @@ namespace DGScope.Library
             }
             if (changed)
             {
-                if (update.TimeStamp > LastMessageTime)
-                    LastMessageTime = update.TimeStamp;
                 Updated?.Invoke(this, new TrackUpdatedEventArgs(update));
             }
             return;
@@ -224,8 +222,14 @@ namespace DGScope.Library
         {
             return Guid.ToString();
         }
+        public void InvokeDeleted()
+        {
+            Deleted?.Invoke(this, null);
+        }
+
         public event EventHandler<UpdateEventArgs> Updated;
         public event EventHandler<UpdateEventArgs> Created;
+        public event EventHandler<EventArgs> Deleted;
     }
     public class TrackUpdatedEventArgs : UpdateEventArgs
     {

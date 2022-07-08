@@ -17,6 +17,9 @@ namespace DGScope.Receivers.FAA_STDDS
     {
         private Dictionary<string, Guid> trackLookup = new Dictionary<string, Guid>();
         private Dictionary<string, Guid> fpLookup = new Dictionary<string, Guid>();
+
+        private object trackLookupLock = new object();
+        private object fpLookupLock = new object();
         public string Host { get; set; }
         public string Username { get; set; }
         [PasswordPropertyText(true)]
@@ -74,10 +77,10 @@ namespace DGScope.Receivers.FAA_STDDS
                     FlightPlan flightPlan = null;
                     if (record.flightPlan != null)
                     {
-                        lock (fpLookup)
+                        lock (fpLookupLock)
                         {
-                            if (fpLookup.TryGetValue($"{data.src}{record.flightPlan.sfpn}", out Guid guid))
-                                flightPlan = GetFlightPlan(guid, data.src);
+                            if (fpLookup.TryGetValue($"{data.src}_{record.flightPlan.sfpn}", out Guid guid))
+                                flightPlan = GetFlightPlan(guid);
                             else
                             {
                                 var facility = GetFacility(data.src);
@@ -85,7 +88,9 @@ namespace DGScope.Receivers.FAA_STDDS
                                 lock (facility.FlightPlans)
                                 {
                                     facility.FlightPlans.Add(newfp);
-                                    fpLookup.Add($"{data.src}{record.flightPlan.sfpn}", newfp.Guid);
+                                    newfp.sfpn = $"{data.src}_{record.flightPlan.sfpn}";
+                                    fpLookup.Add($"{data.src}_{record.flightPlan.sfpn}", newfp.Guid);
+                                    newfp.Deleted += FlightPlan_Deleted;
                                 }
                                 flightPlan = newfp;
                             }
@@ -93,18 +98,19 @@ namespace DGScope.Receivers.FAA_STDDS
                     }
                     if (record.track != null)
                     {
-                        lock (trackLookup)
+                        lock (trackLookupLock)
                         {
-                            if (trackLookup.TryGetValue($"{data.src}{record.track.trackNum}", out Guid guid))
+                            if (trackLookup.TryGetValue($"{data.src}_{record.track.trackNum}", out Guid guid))
                                 track = GetTracks(guid);
                             else
                             {
                                 var facility = GetFacility(data.src);
-                                var newtrack = new Track(facility);
+                                var newtrack = new Track();
                                 lock (facility.Tracks)
                                 {
                                     facility.Tracks.Add(newtrack);
-                                    trackLookup.Add($"{data.src}{record.track.trackNum}", newtrack.Guid);
+                                    trackLookup.Add($"{data.src}_{record.track.trackNum}", newtrack.Guid);
+                                    newtrack.Deleted += Track_Deleted;
                                 }
                                 track = new List<Track>();
                                 track.Add(newtrack);
@@ -173,6 +179,8 @@ namespace DGScope.Receivers.FAA_STDDS
                             case "pending":
                                 update.PendingHandoff = scddsfp.cps;
                                 break;
+                            default:
+                                break;
                         }
                         if (track != null)
                             update.AssociatedTrack = track.FirstOrDefault();
@@ -195,6 +203,27 @@ namespace DGScope.Receivers.FAA_STDDS
             }
             return true;
         }
+
+        private void Track_Deleted(object sender, EventArgs e)
+        {
+            Track track = sender as Track;
+            foreach (var item in trackLookup.Keys.ToList())
+            {
+                if (trackLookup[item] == track.Guid)
+                    trackLookup.Remove(item);
+            }
+        }
+
+        private void FlightPlan_Deleted(object sender, EventArgs e)
+        {
+            FlightPlan fp = sender as FlightPlan;
+            foreach (var item in fpLookup.Keys.ToList())
+            {
+                if (fpLookup[item] == fp.Guid)
+                    fpLookup.Remove(item);
+            }
+        }
+
         private async Task<bool> ReceiveMessage()
         {
             bool stop = false;

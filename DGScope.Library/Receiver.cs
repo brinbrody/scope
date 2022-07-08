@@ -99,8 +99,12 @@ namespace DGScope.Receivers
         {
             FlightPlan flightPlan;
             List<FlightPlan> flightPlans = new List<FlightPlan>();
-            Facilities.ToList().ForEach(x => { lock (flightPlans) flightPlans.AddRange(x.FlightPlans); });
-            flightPlan = flightPlans.Where(x => x.Guid == guid).FirstOrDefault();
+            Facilities.ToList().ForEach(facility => 
+            { 
+                lock (facility.FlightPlans) 
+                    flightPlans.AddRange(facility.FlightPlans.Where(x => x.Guid == guid)); 
+            });
+            flightPlan = flightPlans.FirstOrDefault();
             return flightPlan;
         }
         public Facility GetFacility(string facilityID)

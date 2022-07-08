@@ -26,6 +26,19 @@ namespace DGScope.Library
         public string? PendingHandoff { get; set; }
         public string? AssignedSquawk { get; set; }
         public string? EquipmentSuffix { get; set; }
+        public string sfpn
+        {
+            get
+            {
+                if (Base != null)
+                    return (Base as FlightPlan).sfpn;
+                return null;
+            }
+            set
+            {
+
+            }
+        }
         public LDRDirection? LDRDirection { get; set; }
         [JsonIgnore]
         public Track? AssociatedTrack { get; set; }

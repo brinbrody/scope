@@ -10,6 +10,7 @@ namespace DGScope.Library
 {
     public class FlightPlan :IUpdatable
     {
+        private DateTime created = DateTime.UtcNow;
         public string Callsign { get; private set; }
         public string? AircraftType { get; private set; }
         public string? WakeCategory { get; private set; }
@@ -28,8 +29,9 @@ namespace DGScope.Library
         public string? AssignedSquawk { get; private set; }
         public string? EquipmentSuffix { get; private set; }
 
+        public string sfpn { get; set; }
         public Guid Guid { get; set; } = Guid.NewGuid();
-        public DateTime LastMessageTime { get; private set; } = DateTime.MinValue;
+        public DateTime LastMessageTime { get; private set; } = DateTime.UtcNow;
         public LDRDirection? LDRDirection { get; private set; }
         public Track? AssociatedTrack { get; private set; }
         public Dictionary<string, DateTime> PropertyUpdatedTimes { get; } = new Dictionary<string, DateTime>();
@@ -47,7 +49,8 @@ namespace DGScope.Library
         public void UpdateFlightPlan(FlightPlanUpdate update)
         {
             update.RemoveUnchanged();
-            
+            if (update.TimeStamp > LastMessageTime)
+                LastMessageTime = update.TimeStamp;
 
             bool changed = false;
             foreach (var updateProperty in update.GetType().GetProperties())
@@ -68,8 +71,6 @@ namespace DGScope.Library
             }
             if (changed)
             {
-                if (update.TimeStamp > LastMessageTime)
-                    LastMessageTime = update.TimeStamp;
                 Updated?.Invoke(this, new FlightPlanUpdatedEventArgs(update));
             }
             return;
@@ -84,8 +85,15 @@ namespace DGScope.Library
         {
             return Callsign;
         }
+
+        public void InvokeDeleted()
+        {
+            Deleted?.Invoke(this, null);
+        }
+
         public event EventHandler<UpdateEventArgs> Updated;
         public event EventHandler<UpdateEventArgs> Created;
+        public event EventHandler<EventArgs> Deleted;
     }
 
     public class FlightPlanUpdatedEventArgs : UpdateEventArgs

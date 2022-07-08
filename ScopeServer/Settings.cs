@@ -102,9 +102,15 @@ namespace ScopeServer
                     lock (facility)
                     {
                         lock (facility.Tracks)
-                            facility.Tracks.Where(track => track.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.Tracks.Remove(x));
+                            facility.Tracks.Where(track => track.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(  x => {
+                                facility.Tracks.Remove(x);
+                                x.InvokeDeleted();
+                            });
                         lock (facility.FlightPlans)
-                            facility.FlightPlans.Where(flightPlan => flightPlan.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => facility.FlightPlans.Remove(x));
+                            facility.FlightPlans.Where(flightPlan => flightPlan.LastMessageTime < DateTime.UtcNow.AddSeconds(-garbageCollectionInterval)).ToList().ForEach(x => {
+                                facility.FlightPlans.Remove(x);
+                                x.InvokeDeleted();
+                            });
                     }
                 }
         }

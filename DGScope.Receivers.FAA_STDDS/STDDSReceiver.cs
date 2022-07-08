@@ -212,6 +212,7 @@ namespace DGScope.Receivers.FAA_STDDS
                 if (trackLookup[item] == track.Guid)
                     trackLookup.Remove(item);
             }
+            track.Deleted -= Track_Deleted;
         }
 
         private void FlightPlan_Deleted(object sender, EventArgs e)
@@ -222,6 +223,7 @@ namespace DGScope.Receivers.FAA_STDDS
                 if (fpLookup[item] == fp.Guid)
                     fpLookup.Remove(item);
             }
+            fp.Deleted -= FlightPlan_Deleted;
         }
 
         private async Task<bool> ReceiveMessage()

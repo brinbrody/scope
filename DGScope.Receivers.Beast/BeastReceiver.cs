@@ -37,7 +37,7 @@ namespace DGScope.Receivers.Beast
             foreach (ExtractedBytes item in bytes)
             {
                 var modes = mst.Translate(item.Bytes, 0, item.SignalLevel, item.IsMlat);
-                if (modes.Icao24 == null)
+                if (modes.Icao24 == 0)
                     continue;
                 var adsb = adsbt.Translate(modes);
                 AdsbUpdate update;

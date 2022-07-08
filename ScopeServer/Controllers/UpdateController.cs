@@ -32,17 +32,16 @@ namespace ScopeServer.Controllers
         [Route("{facilityID}/updates")]
         public async Task GetUpdates(string facilityID)
         {
+            SetFacilityID(facilityID);
             if (Response.HttpContext.WebSockets.IsWebSocketRequest)
             {
-                SetFacilityID(facilityID);
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                StartUpdateSocket(webSocket);
+                await StartUpdateSocket(webSocket);
             }
             else
             {
                 this.Response.StatusCode = 200;
                 this.Response.Headers.Add(HeaderNames.ContentType, "application/json");
-                SetFacilityID(facilityID);
                 while (!HttpContext.RequestAborted.IsCancellationRequested)
                 {
                     List<Update> sending;

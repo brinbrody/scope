@@ -175,5 +175,10 @@ namespace DGScope.Receivers
         {
             tracks.ForEach(x => x.UpdateTrack(new TrackUpdate(update, x)));
         }
+
+        public void SendTrackUpdates(Track track, TrackUpdate update)
+        {
+            track.UpdateTrack(new TrackUpdate(update, track));
+        }
     }
 }

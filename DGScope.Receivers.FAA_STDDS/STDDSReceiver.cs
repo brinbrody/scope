@@ -73,7 +73,7 @@ namespace DGScope.Receivers.FAA_STDDS
                 {
                     if (stop)
                         return false;
-                    List<Track> track = null;
+                    Track track = null;
                     FlightPlan flightPlan = null;
                     if (record.flightPlan != null)
                     {
@@ -81,7 +81,7 @@ namespace DGScope.Receivers.FAA_STDDS
                         {
                             if (fpLookup.TryGetValue($"{data.src}_{record.flightPlan.sfpn}", out Guid guid))
                                 flightPlan = GetFlightPlan(guid);
-                            else
+                            else if (record.flightPlan.delete == 0)
                             {
                                 var facility = GetFacility(data.src);
                                 var newfp = new FlightPlan(record.flightPlan.acid.Trim());
@@ -94,6 +94,14 @@ namespace DGScope.Receivers.FAA_STDDS
                                 }
                                 flightPlan = newfp;
                             }
+                            if (flightPlan != null && record.flightPlan.delete == 1)
+                            {
+                                var facility = GetFacility(data.src);
+                                lock (facility.FlightPlans)
+                                    if (facility.FlightPlans.Contains(flightPlan))
+                                        facility.FlightPlans.Remove(flightPlan);
+                                flightPlan.InvokeDeleted();
+                            }
                         }
                     }
                     if (record.track != null)
@@ -101,8 +109,8 @@ namespace DGScope.Receivers.FAA_STDDS
                         lock (trackLookupLock)
                         {
                             if (trackLookup.TryGetValue($"{data.src}_{record.track.trackNum}", out Guid guid))
-                                track = GetTracks(guid);
-                            else
+                                track = GetTrack(guid);
+                            else if (record.track.status != null && record.track.status.ToLower() == "active")
                             {
                                 var facility = GetFacility(data.src);
                                 var newtrack = new Track();
@@ -112,9 +120,16 @@ namespace DGScope.Receivers.FAA_STDDS
                                     trackLookup.Add($"{data.src}_{record.track.trackNum}", newtrack.Guid);
                                     newtrack.Deleted += Track_Deleted;
                                 }
-                                track = new List<Track>();
-                                track.Add(newtrack);
+                                track = newtrack;
                             }
+                            if (track != null && record.track.status != null && record.track.status.ToLower() == "drop")
+                            {
+                                var facility = GetFacility(data.src);
+                                lock (facility.Tracks)
+                                if (facility.Tracks.Contains(track))
+                                    facility.Tracks.Remove(track);
+                                track.InvokeDeleted();
+                            }    
                         }
                             
                     }
@@ -183,9 +198,7 @@ namespace DGScope.Receivers.FAA_STDDS
                                 break;
                         }
                         if (track != null)
-                            update.AssociatedTrack = track.FirstOrDefault();
-                        if (track != null && track.Count > 1)
-                            ;
+                            update.AssociatedTrack = track;
                         flightPlan.UpdateFlightPlan(update);
                     }
                     else

@@ -109,7 +109,7 @@ namespace DGScope.Receivers.FAA_STDDS
                         lock (trackLookupLock)
                         {
                             if (trackLookup.TryGetValue($"{data.src}_{record.track.trackNum}", out Guid guid))
-                                track = GetTrack(guid);
+                                track = GetTrack(guid, data.src, false);
                             else if (record.track.status != null && record.track.status.ToLower() == "active")
                             {
                                 var facility = GetFacility(data.src);
@@ -223,7 +223,10 @@ namespace DGScope.Receivers.FAA_STDDS
             foreach (var item in trackLookup.Keys.ToList())
             {
                 if (trackLookup[item] == track.Guid)
+                {
                     trackLookup.Remove(item);
+                    break;
+                }
             }
             track.Deleted -= Track_Deleted;
         }
@@ -234,7 +237,10 @@ namespace DGScope.Receivers.FAA_STDDS
             foreach (var item in fpLookup.Keys.ToList())
             {
                 if (fpLookup[item] == fp.Guid)
+                {
                     fpLookup.Remove(item);
+                    break;
+                }
             }
             fp.Deleted -= FlightPlan_Deleted;
         }
@@ -253,7 +259,7 @@ namespace DGScope.Receivers.FAA_STDDS
                 if (message == null)
                     continue;
                 receiver.Accept(message);
-                Task.Run(() => ParseMessage(message));
+                ParseMessage(message);
             }
             return true;
         }

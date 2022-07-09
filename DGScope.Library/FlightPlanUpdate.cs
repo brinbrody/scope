@@ -48,6 +48,8 @@ namespace DGScope.Library
             {
                 if (AssociatedTrack != null)
                     return AssociatedTrack.Guid;
+                else if ((Base as FlightPlan).AssociatedTrack == null)
+                    return Guid.Empty;
                 return null;
             }
         }

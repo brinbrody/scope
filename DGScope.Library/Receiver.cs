@@ -48,28 +48,44 @@ namespace DGScope.Receivers
 
             return track;
         }
-
-        public Track GetTrack(Guid guid, string facilityID = null)
+        public Track GetTrack (Guid guid, Facility facility)
         {
-            List<Track> tracks = new List<Track>();
+            lock (facility.Tracks)
+            {
+                foreach (Track track in facility.Tracks)
+                {
+                    if (track.Guid == guid)
+                        return track;
+                }
+            }
+            return null;
+        }
+        public Track GetTrack(Guid guid, string facilityID = null, bool addnew = false)
+        {
+            Track track = null;
             if (facilityID == null)
-                Facilities.ToList().ForEach(facility => { lock (facility.Tracks) tracks.AddRange(facility.Tracks.Where(x => x.Guid == guid)); });
+            {
+                foreach (Facility facility in Facilities)
+                {
+                    track = GetTrack(guid, facility);
+                    if (track != null)
+                        return track;
+                }
+            }
             else
             {
                 var facility = GetFacility(facilityID);
                 lock (facility.Tracks)
                 {
-                    facility.Tracks.ToList().ForEach(track => tracks.AddRange(facility.Tracks.Where(x => x.Guid == guid)));
-                    Track track = tracks.FirstOrDefault();
-                    if (track == null)
+                    track = GetTrack(guid, facility);
+                    if (track == null && addnew)
                     {
                         track = new Track(guid);
                         facility.Tracks.Add(track);
-                        tracks.Add(track);
                     }
                 }
             }
-            return tracks.FirstOrDefault();
+            return track;
         }
         public List<Track> GetTracks (int modeSCode, GeoPoint trackLocation)
         {

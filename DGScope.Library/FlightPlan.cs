@@ -88,6 +88,7 @@ namespace DGScope.Library
 
         public void InvokeDeleted()
         {
+            AssociatedTrack = null;
             Deleted?.Invoke(this, null);
         }
 

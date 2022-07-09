@@ -22,7 +22,7 @@ namespace ScopeServer
         private static EmailSettings emailSettings;
         private static SmtpClient smtpClient;
 
-        private static int garbageCollectionInterval = 30; //30 seconds
+        private static int garbageCollectionInterval = 300; //5 minutes
 
 
         public static ObservableCollection<Facility> Facilities

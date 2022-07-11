@@ -161,7 +161,8 @@ namespace DGScope.Library
     }
     public enum UpdateType
     {
-        Track,
-        Flightplan
+        Track = 0,
+        Flightplan = 1,
+        Deletion = 2
     }
 }

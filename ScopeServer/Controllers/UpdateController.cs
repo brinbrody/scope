@@ -178,6 +178,7 @@ namespace ScopeServer.Controllers
                 case NotifyCollectionChangedAction.Remove:
                     foreach (IUpdatable item in e.OldItems)
                     {
+                        PendingUpdates.Add(new DeletionUpdate(item));
                         item.Updated -= UpdateReceived;
                     }
                     break;

@@ -145,7 +145,8 @@ namespace DGScope.Receivers.FAA_STDDS
                         update.GroundSpeed = GroundSpeed(record.track.vx, record.track.vy);
                         if (update.Altitude == null)
                             update.Altitude = new Altitude();
-                        update.Altitude.TrueAltitude = record.track.reportedAltitude; 
+                        if (record.track.reportedAltitude != null && record.track.reportedAltitude != 0)
+                            update.Altitude.TrueAltitude = (int)record.track.reportedAltitude; 
                         var addressString = record.track.acAddress;
                         int address = 0;
                         if (addressString != "")

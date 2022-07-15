@@ -6,7 +6,7 @@ namespace DGScope.Library
     public class Altitude
     {
         public int Value { get; set; }
-        public AltitudeType AltitudeType { get; set; }
+        public AltitudeType AltitudeType { get; set; } = AltitudeType.Unknown;
         [JsonIgnore]
         public int TransitionAltitude { get; set; }
         [JsonIgnore]
@@ -16,6 +16,8 @@ namespace DGScope.Library
             {
                 if (AltitudeType == AltitudeType.Pressure)
                     return Value;
+                if (AltitudeType == AltitudeType.Unknown)
+                    return int.MinValue;
                 if (Altimeter == null)
                     throw new Exception("Altimeter was not set.");
                 var correction = (int)((Altimeter.Value - 29.92) * 1000);
@@ -36,6 +38,8 @@ namespace DGScope.Library
             {
                 if (AltitudeType == AltitudeType.True)
                     return Value;
+                if (AltitudeType == AltitudeType.Unknown)
+                    return int.MinValue;
                 if (Altimeter == null)
                     throw new Exception("Altimeter was not set.");
                 var correction = (int)((Altimeter.Value - 29.92) * 1000);
@@ -138,6 +142,8 @@ namespace DGScope.Library
     }
     public enum AltitudeType
     {
-        Pressure, True
+        Pressure = 0, 
+        True = 1,
+        Unknown = 2
     }
 }

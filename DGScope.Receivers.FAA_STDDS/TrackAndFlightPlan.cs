@@ -184,7 +184,7 @@ public partial class recordTrack
 
     private uint reportedBeaconCodeField;
 
-    private int reportedAltitudeField;
+    private int? reportedAltitudeField;
 
     /// <remarks/>
     public uint trackNum
@@ -434,7 +434,7 @@ public partial class recordTrack
     }
 
     /// <remarks/>
-    public int reportedAltitude
+    public int? reportedAltitude
     {
         get
         {

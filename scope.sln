@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29409.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DGScope", "scope\DGScope.csproj", "{DE29D155-652E-44C2-8008-C6C3E5A45A16}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Library", "DGScope.Library\DGScope.Library.csproj", "{E6F34299-1536-4ED4-A8CD-397B1CA354E1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScopeWindow", "ScopeWindow\ScopeWindow.csproj", "{1C708608-48D8-4F2A-9D9D-8012CB10C96F}"
@@ -23,10 +21,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Release|Any CPU.ActiveCfg = Release|Any CPU

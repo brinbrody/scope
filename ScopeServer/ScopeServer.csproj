@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DGScope.Library\DGScope.Library.csproj" />
-    <ProjectReference Include="..\DGScope.Receivers.Beast\DGScope.Receivers.Beast.csproj" />
     <ProjectReference Include="..\DGScope.Receivers.FAA_STDDS\DGScope.Receivers.FAA_STDDS.csproj" />
     <ProjectReference Include="..\DGScope.Receivers.ReadsbJSON\DGScope.Receivers.ReadsbJSON.csproj" />
   </ItemGroup>

@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29409.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DGScope", "scope\DGScope.csproj", "{DE29D155-652E-44C2-8008-C6C3E5A45A16}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.ADSBX", "DGScope.Receivers.ADSBX\DGScope.Receivers.ADSBX.csproj", "{34098207-2394-481B-BF0E-91595F175EAD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Library", "DGScope.Library\DGScope.Library.csproj", "{E6F34299-1536-4ED4-A8CD-397B1CA354E1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScopeWindow", "ScopeWindow\ScopeWindow.csproj", "{1C708608-48D8-4F2A-9D9D-8012CB10C96F}"
@@ -15,19 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Nexrad", "Nexrad\DG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.FAA_STDDS", "DGScope.Receivers.FAA_STDDS\DGScope.Receivers.FAA_STDDS.csproj", "{34362ED1-E7CE-4B90-92AE-E76BAB83405B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.SBS", "DGScope.Receivers.SBS\DGScope.Receivers.SBS.csproj", "{8FBF7458-2D32-4FD6-9F7B-348B29290949}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReceiverTester", "ReceiverTester\ReceiverTester.csproj", "{72DEFF13-8B24-47E4-9314-6B690B3344AB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScopeServer", "ScopeServer\ScopeServer.csproj", "{738C1257-6D48-41A2-BA2A-14ED7F0B48C6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.Beast", "DGScope.Receivers.Beast\DGScope.Receivers.Beast.csproj", "{EBF601AD-1D7A-4482-A9A9-8684E77FCFFE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualRadar", "VirtualRadar\VirtualRadar.csproj", "{07CD71CD-2435-4088-81FC-A29322E09C35}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.AdsbUploadClient", "DGScope.AdsbUploadClient\DGScope.AdsbUploadClient.csproj", "{8FE5361A-CFA7-4070-8038-55BDD3F773F2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DGScope.Receivers.ReadsbJSON", "DGScope.Receivers.ReadsbJSON\DGScope.Receivers.ReadsbJSON.csproj", "{EEAEC3FE-452B-45F5-89D9-3D6963131814}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.ReadsbJSON", "DGScope.Receivers.ReadsbJSON\DGScope.Receivers.ReadsbJSON.csproj", "{EEAEC3FE-452B-45F5-89D9-3D6963131814}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,10 +27,6 @@ Global
 		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE29D155-652E-44C2-8008-C6C3E5A45A16}.Release|Any CPU.Build.0 = Release|Any CPU
-		{34098207-2394-481B-BF0E-91595F175EAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34098207-2394-481B-BF0E-91595F175EAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34098207-2394-481B-BF0E-91595F175EAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34098207-2394-481B-BF0E-91595F175EAD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6F34299-1536-4ED4-A8CD-397B1CA354E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -59,30 +43,10 @@ Global
 		{34362ED1-E7CE-4B90-92AE-E76BAB83405B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34362ED1-E7CE-4B90-92AE-E76BAB83405B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34362ED1-E7CE-4B90-92AE-E76BAB83405B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8FBF7458-2D32-4FD6-9F7B-348B29290949}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8FBF7458-2D32-4FD6-9F7B-348B29290949}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8FBF7458-2D32-4FD6-9F7B-348B29290949}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8FBF7458-2D32-4FD6-9F7B-348B29290949}.Release|Any CPU.Build.0 = Release|Any CPU
-		{72DEFF13-8B24-47E4-9314-6B690B3344AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72DEFF13-8B24-47E4-9314-6B690B3344AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72DEFF13-8B24-47E4-9314-6B690B3344AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72DEFF13-8B24-47E4-9314-6B690B3344AB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{738C1257-6D48-41A2-BA2A-14ED7F0B48C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{738C1257-6D48-41A2-BA2A-14ED7F0B48C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{738C1257-6D48-41A2-BA2A-14ED7F0B48C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{738C1257-6D48-41A2-BA2A-14ED7F0B48C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EBF601AD-1D7A-4482-A9A9-8684E77FCFFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EBF601AD-1D7A-4482-A9A9-8684E77FCFFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EBF601AD-1D7A-4482-A9A9-8684E77FCFFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EBF601AD-1D7A-4482-A9A9-8684E77FCFFE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{07CD71CD-2435-4088-81FC-A29322E09C35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{07CD71CD-2435-4088-81FC-A29322E09C35}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{07CD71CD-2435-4088-81FC-A29322E09C35}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{07CD71CD-2435-4088-81FC-A29322E09C35}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8FE5361A-CFA7-4070-8038-55BDD3F773F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8FE5361A-CFA7-4070-8038-55BDD3F773F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8FE5361A-CFA7-4070-8038-55BDD3F773F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8FE5361A-CFA7-4070-8038-55BDD3F773F2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EEAEC3FE-452B-45F5-89D9-3D6963131814}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EEAEC3FE-452B-45F5-89D9-3D6963131814}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEAEC3FE-452B-45F5-89D9-3D6963131814}.Release|Any CPU.ActiveCfg = Release|Any CPU

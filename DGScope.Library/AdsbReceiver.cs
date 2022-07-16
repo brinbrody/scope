@@ -20,18 +20,10 @@ namespace DGScope.Receivers
             Start();
         }
 
-        public void SendUpdate(AdsbUpdate update)
+        public void SendUpdate(TrackUpdate update)
         {
-            AdsbUpdateReceived?.Invoke(this, new AdsbUpdateEventArgs(update));
+            AdsbUpdateReceived?.Invoke(this, new UpdateEventArgs(update));
         }
-        public event EventHandler<AdsbUpdateEventArgs> AdsbUpdateReceived;
+        public event EventHandler<UpdateEventArgs> AdsbUpdateReceived;
     }
-    public class AdsbUpdateEventArgs : EventArgs
-    {
-        public AdsbUpdate AdsbUpdate { get; }
-        public AdsbUpdateEventArgs(AdsbUpdate update)
-        {
-            AdsbUpdate = update;
-        }
     }
-}

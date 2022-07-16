@@ -21,11 +21,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReceiverTester", "ReceiverT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScopeServer", "ScopeServer\ScopeServer.csproj", "{738C1257-6D48-41A2-BA2A-14ED7F0B48C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DGScope.Receivers.Beast", "DGScope.Receivers.Beast\DGScope.Receivers.Beast.csproj", "{EBF601AD-1D7A-4482-A9A9-8684E77FCFFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.Receivers.Beast", "DGScope.Receivers.Beast\DGScope.Receivers.Beast.csproj", "{EBF601AD-1D7A-4482-A9A9-8684E77FCFFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualRadar", "VirtualRadar\VirtualRadar.csproj", "{07CD71CD-2435-4088-81FC-A29322E09C35}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtualRadar", "VirtualRadar\VirtualRadar.csproj", "{07CD71CD-2435-4088-81FC-A29322E09C35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DGScope.AdsbUploadClient", "DGScope.AdsbUploadClient\DGScope.AdsbUploadClient.csproj", "{8FE5361A-CFA7-4070-8038-55BDD3F773F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DGScope.AdsbUploadClient", "DGScope.AdsbUploadClient\DGScope.AdsbUploadClient.csproj", "{8FE5361A-CFA7-4070-8038-55BDD3F773F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DGScope.Receivers.ReadsbJSON", "DGScope.Receivers.ReadsbJSON\DGScope.Receivers.ReadsbJSON.csproj", "{EEAEC3FE-452B-45F5-89D9-3D6963131814}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{8FE5361A-CFA7-4070-8038-55BDD3F773F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FE5361A-CFA7-4070-8038-55BDD3F773F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FE5361A-CFA7-4070-8038-55BDD3F773F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEAEC3FE-452B-45F5-89D9-3D6963131814}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEAEC3FE-452B-45F5-89D9-3D6963131814}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEAEC3FE-452B-45F5-89D9-3D6963131814}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEAEC3FE-452B-45F5-89D9-3D6963131814}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

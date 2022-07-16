@@ -143,6 +143,8 @@ namespace DGScope.Library
         }
         public void UpdateTrack(TrackUpdate update)
         {
+            if (update.Source == TrackUpdate.UpdateSource.ADS_B)
+                ;
             if (update.TimeStamp > LastMessageTime)
                 LastMessageTime = update.TimeStamp;
             bool changed = false;

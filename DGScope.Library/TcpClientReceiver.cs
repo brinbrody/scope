@@ -5,18 +5,21 @@ using System.Threading;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
-namespace DGScope.Receivers.Beast
+namespace DGScope.Receivers
 {
     public abstract class TcpClientReceiver : AdsbReceiver
     {
         private TcpClient _client = new TcpClient();
         private bool stop = true;
-        private NetworkStream networkStream;
+        protected NetworkStream Stream;
         //private System.Timers.Timer tmrReceiveTimeout = new System.Timers.Timer();
         //private System.Timers.Timer tmrSendTimeout = new System.Timers.Timer();
         private System.Timers.Timer tmrConnectTimeout = new System.Timers.Timer(5000);
         private byte[] dataBuffer = new byte[5000];
+
+        public bool Connected => _client.Connected;
         
         public string Host { get; set; }
         public int Port { get; set; } = 30005;
@@ -72,10 +75,16 @@ namespace DGScope.Receivers.Beast
             if (!_client.Client.Connected)
                 _client.BeginConnect(Host, Port, new AsyncCallback(ConnectCallback), _client);
         }
-        private void cbConnectComplete()
+        protected virtual void cbConnectComplete()
         {
+            
             if (_client.Connected)
-                _client.Client.BeginReceive(dataBuffer, 0, dataBuffer.Length, SocketFlags.None, new AsyncCallback(cbDataReceived), _client.Client);
+            {
+                Stream = _client.GetStream();
+            }
+                //_client.Client.BeginReceive(dataBuffer, 0, dataBuffer.Length, SocketFlags.None, new AsyncCallback(cbDataReceived), _client.Client);
+            
+            
         }
         private void cbDataReceived(IAsyncResult result)
         {

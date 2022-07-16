@@ -17,7 +17,7 @@ namespace DGScope.AdsbUploadClient
     class AdsbUploader
     {
         AdsbUploadClientSettings settings = new AdsbUploadClientSettings();
-        List<AdsbUpdate> updates = new List<AdsbUpdate>();
+        List<TrackUpdate> updates = new List<TrackUpdate>();
         public AdsbUploader()
         {
             if (File.Exists("uploadersettings.json"))
@@ -40,17 +40,17 @@ namespace DGScope.AdsbUploadClient
             }
         }
 
-        private void Receiver_AdsbUpdateReceived(object sender, AdsbUpdateEventArgs e)
+        private void Receiver_AdsbUpdateReceived(object sender, UpdateEventArgs e)
         {
             lock (updates)
             {
-                updates.Add(e.AdsbUpdate);
+                updates.Add(e.Update as TrackUpdate);
             }
         }
 
-        private AdsbUpdate[] FetchUpdates()
+        private TrackUpdate[] FetchUpdates()
         {
-            List<AdsbUpdate> sending = new List<AdsbUpdate>();
+            List<TrackUpdate> sending = new List<TrackUpdate>();
             lock (updates)
             {
                 updates.ForEach(update => sending.Add(update));
@@ -58,19 +58,19 @@ namespace DGScope.AdsbUploadClient
             }
             return sending.ToArray();
         }
-        private void SendUpdates(AdsbUpdate[] sending)
+        private void SendUpdates(TrackUpdate[] sending)
         {
             if (sending.Length > 250)
             {
-                AdsbUpdate[] buffer;
+                TrackUpdate[] buffer;
                 int i;
                 for (i = 0; i + 250 < sending.Length; i+= 250)
                 {
-                    buffer = new AdsbUpdate[250];
+                    buffer = new TrackUpdate[250];
                     Array.Copy(sending, i, buffer, 0, 250);
                     SendUpdates(buffer);
                 }
-                buffer = new AdsbUpdate[sending.Length - i];
+                buffer = new TrackUpdate[sending.Length - i];
                 Array.Copy(sending, i, buffer, 0, sending.Length - i);
                 sending = buffer;
             }

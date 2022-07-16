@@ -16,6 +16,7 @@ namespace ScopeServer
     {
         private static ObservableCollection<Facility> facilities;
         private static List<PatWatch> patWatches;
+        private static List<AdsbReceiver> adsbReceivers;
         private static ReceiverList receivers;
         private static bool started;
         private static System.Timers.Timer garbageCollectionTimer;
@@ -51,6 +52,15 @@ namespace ScopeServer
                 if (patWatches == null)
                     patWatches = new List<PatWatch>();
                 return patWatches;
+            }
+        }
+        public static List<AdsbReceiver> AdsbReceivers
+        {
+            get
+            {
+                if (adsbReceivers == null)
+                    adsbReceivers = new List<AdsbReceiver>();
+                return adsbReceivers;
             }
         }
 
@@ -140,5 +150,6 @@ namespace ScopeServer
                 return receivers;
             }
         }
+
     }
 }
